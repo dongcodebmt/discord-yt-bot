@@ -1,0 +1,10 @@
+services:
+  discord-yt-bot:
+    image: dongdev/discord-yt-bot:latest
+    container_name: discord-yt-bot
+    build:
+      context: ./src
+      dockerfile: ./src/Dockerfile
+    volumes:
+      - ./.env:/app/.env
+    restart: unless-stopped
