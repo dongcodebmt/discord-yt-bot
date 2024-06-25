@@ -1,8 +1,8 @@
 import messages from '@/constants/messages';
-import { QueueItem, Server } from '@/models/Server';
+import { Server } from '@/models/Server';
 import { servers } from '@/servers';
-import { YoutubeService } from '@/services/youtube';
-import { Platform } from '@/types/Platform';
+import { YoutubeService } from '@/services/youtube';;
+import { Platform, Playlist, QueueItem, Song, ItemType } from '@/types';
 import {
   entersState,
   joinVoiceChannel,
@@ -51,19 +51,13 @@ export const play = {
       return;
     }
     try {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const service = new YoutubeService();
       const input = interaction.options.get('input')!.value! as string;
-      const playListId = YoutubeService.isPlaylist(input);
-      if (playListId) {
-        const playlist = await YoutubeService.getPlaylist(playListId);
-        const songs = playlist.songs.map((song) => {
-          const queueItem: QueueItem = {
-            song,
-            requester: interaction.member?.user.username as string,
-          };
-          return queueItem;
-        });
-        await server.addSongs(songs);
+      const result = await service.getResult(input);
+      const requester = interaction.member?.user.username ?? '';
+      if ((result as Playlist).songs) {
+        const playlist = (result as Playlist);
+        await server.addSongs(playlist.songs.map(item => <QueueItem>{ song: item, requester }));
         interaction.followUp({
           embeds: [
             createPlayMessage({
@@ -71,20 +65,19 @@ export const play = {
               url: input,
               author: playlist.author,
               thumbnail: playlist.thumbnail,
-              type: 'Playlist',
+              type: ItemType.PLAYLIST,
               length: playlist.songs.length,
               platform: Platform.YOUTUBE,
-              requester: interaction.member?.user.username as string,
+              requester
             }),
           ],
         });
       } else {
-        const song = await YoutubeService.getVideoDetails(input);
-        const queueItem: QueueItem = {
-          song,
-          requester: interaction.member?.user.username as string,
-        };
-        await server.addSongs([queueItem]);
+        const song = (result as Song);
+        await server.addSongs([{
+          song: result as Song,
+          requester: interaction.member?.user.username ?? ''
+        }]);
         interaction.followUp({
           embeds: [
             createPlayMessage({
@@ -92,10 +85,10 @@ export const play = {
               url: song.url,
               author: song.author,
               thumbnail: song.thumbnail,
-              type: 'Song',
-              length: song.length,
+              type: ItemType.VIDEO,
+              length: song.duration,
               platform: Platform.YOUTUBE,
-              requester: interaction.member?.user.username as string,
+              requester
             }),
           ],
         });

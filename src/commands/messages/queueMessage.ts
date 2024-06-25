@@ -1,6 +1,6 @@
 import { MESSAGE_EMBED_COLOR } from '@/constants/config';
 import messages from '@/constants/messages';
-import { QueueItem } from '@/models/Server';
+import { QueueItem } from '@/types';
 import { formatSeconds } from '@/utils';
 import { EmbedBuilder, Embed } from 'discord.js';
 
@@ -11,7 +11,7 @@ const generatePageMessage = (items: QueueItem[], start: number) => {
     title: messages.yourQueue,
     fields: items.map((item, index) => ({
       name: `${start + 1 + index}. ${item.song.title} | ${item.song.author}`,
-      value: `${formatSeconds(item.song.length)} | ${item.song.platform} | ${
+      value: `${formatSeconds(item.song.duration)} | ${item.song.platform} | ${
         messages.addedToQueue
       } ${item.requester}`,
     })),

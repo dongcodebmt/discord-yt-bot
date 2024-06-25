@@ -1,7 +1,8 @@
 import { Colors } from 'discord.js';
-import { Platform } from '@/types/Platform';
+import { Platform } from '@/types';
 
 export const BOT_TOKEN = process.env.BOT_TOKEN;
+export const BOT_LANG = process.env.BOT_LANG ?? 'en';
 export const CMD_PREFLIX = '/';
 export const MESSAGE_EMBED_COLOR = Colors.Red;
 

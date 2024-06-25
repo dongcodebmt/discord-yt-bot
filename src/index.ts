@@ -13,13 +13,12 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildIntegrations,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
   ]
 });
 
 client.on('ready', () => {
-  console.log('🏃‍♂️💨 Bot is online!');
+  console.log('🏃‍♂️ Bot is online! 💨');
 });
 
 client.once('reconnecting', () => {
@@ -30,16 +29,11 @@ client.once('disconnect', () => {
   console.log('🛑 Disconnect!');
 });
 
-async function main() {
-  await client.login(BOT_TOKEN);
-  run(client);
-}
-
 (async () => {
   try {
-    main();
+    await client.login(BOT_TOKEN);
+    run(client);
   } catch (e: any) {
     console.log('Error:', e.stack);
-    main();
   }
 })();

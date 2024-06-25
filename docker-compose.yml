@@ -3,8 +3,13 @@ services:
     image: dongdev/discord-yt-bot:latest
     container_name: discord-yt-bot
     build:
-      context: ./src
-      dockerfile: ./src/Dockerfile
+      context: .
+      dockerfile: ./Dockerfile
     volumes:
       - ./.env:/app/.env
-    restart: unless-stopped
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    restart: on-failure

@@ -5,7 +5,7 @@ import {
   PLATFORM,
 } from '@/constants/config';
 import messages from '@/constants/messages';
-import { Platform } from '@/types/Platform';
+import { Platform, ItemType } from '@/types';
 import { formatSeconds } from '@/utils';
 import { APIEmbedField, EmbedBuilder } from 'discord.js';
 
@@ -14,7 +14,7 @@ export const createPlayMessage = (payload: {
   url: string;
   author: string;
   thumbnail: string;
-  type: 'Song' | 'Playlist';
+  type: ItemType;
   length: number;
   platform: Platform;
   requester: string;
@@ -25,11 +25,8 @@ export const createPlayMessage = (payload: {
     inline: true,
   };
   const length: APIEmbedField = {
-    name: messages.length,
-    value:
-      payload.type === 'Playlist'
-        ? payload.length.toString()
-        : formatSeconds(payload.length),
+    name: payload.type === ItemType.PLAYLIST ? messages.length : messages.duration,
+    value: payload.type === ItemType.PLAYLIST ? payload.length.toString() : formatSeconds(payload.length),
     inline: true,
   };
   const type: APIEmbedField = {
@@ -37,6 +34,7 @@ export const createPlayMessage = (payload: {
     value: payload.type,
     inline: true,
   };
+  const fields: APIEmbedField[] = payload.type == ItemType.PLAYLIST ? [length, type] : [author, length, type];
   return new EmbedBuilder()
     .setColor(MESSAGE_EMBED_COLOR)
     .setTitle(payload.title)
@@ -46,6 +44,6 @@ export const createPlayMessage = (payload: {
       url: PLATFORM[payload.platform].uri
     })
     .setThumbnail(payload.thumbnail)
-    .addFields(author, length, type)
+    .addFields(fields)
     .setFooter({ text: BOT_NAME, iconURL: BOT_LOGO });
 };

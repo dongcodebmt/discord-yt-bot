@@ -11,7 +11,6 @@ export const remove = {
       await interaction.followUp(messages.joinVoiceChannel);
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const input = interaction.options.get('position')!.value! as number;
     if (input < 1 || input > server.queue.length || !Number.isInteger(input)) {
       await interaction.followUp(messages.invalidPosition);

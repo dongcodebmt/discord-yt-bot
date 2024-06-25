@@ -22,7 +22,7 @@ export const nowPlaying = {
       author: playing.song.author,
       thumbnail: playing.song.thumbnail,
       url: playing.song.url,
-      length: playing.song.length,
+      length: playing.song.duration,
       platform: playing.song.platform,
       requester: playing.requester,
     });

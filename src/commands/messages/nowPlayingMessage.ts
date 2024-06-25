@@ -5,7 +5,7 @@ import {
   PLATFORM,
 } from '@/constants/config';
 import messages from '@/constants/messages';
-import { Platform } from '@/types/Platform';
+import { Platform } from '@/types';
 import { formatSeconds } from '@/utils';
 import { APIEmbedField, EmbedBuilder } from 'discord.js';
 

@@ -1,7 +1,5 @@
 import { servers } from '@/servers';
-// import { scdl } from '@/services/soundcloud';
-import { Platform } from '@/types/Platform';
-import { Song } from '@/types/Song';
+import { QueueItem, Platform } from '@/types';
 import {
   AudioPlayer,
   AudioPlayerStatus,
@@ -13,12 +11,8 @@ import {
   VoiceConnectionStatus,
 } from '@discordjs/voice';
 import { shuffle } from '@/utils';
-import ytdl from 'ytdl-core';
-
-export interface QueueItem {
-  song: Song;
-  requester: string;
-}
+import { YoutubeService } from '@/services/youtube';
+import { SoundCloudService } from '@/services/soundcould';
 
 export class Server {
   public guildId: string;
@@ -160,17 +154,13 @@ export class Server {
         let stream: any;
         const highWaterMark = 1024 * 1024 * 10;
         if (this.playing?.song.platform === Platform.YOUTUBE) {
-          stream = ytdl(this.playing.song.url, {
-            highWaterMark,
-            filter: 'audioonly',
-            quality: 'highestaudio',
-          });
+          const service = new YoutubeService();
+          stream = await service.getStream(this.playing?.song.url);
         }
-        // else {
-        //   stream = await scdl.download(this.playing.song.url, {
-        //     highWaterMark,
-        //   });
-        // }
+        if (this.playing?.song.platform === Platform.SOUND_CLOUD) {
+          const service = new SoundCloudService();
+          stream = await service.getStream(this.playing?.song.url);
+        }
         const audioResource = createAudioResource(stream);
         this.audioPlayer.play(audioResource);
       } else {

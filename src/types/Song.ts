@@ -1,8 +1,8 @@
-import { Platform } from '@/types/Platform';
+import { Platform } from '@/types';
 
 export interface Song {
   title: string;
-  length: number;
+  duration: number;
   author: string;
   thumbnail: string;
   url: string;

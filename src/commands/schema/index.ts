@@ -1,77 +1,90 @@
 import { ApplicationCommandData } from 'discord.js';
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
+import messages from '@/constants/messages';
 
 export const schema: ApplicationCommandData[] = [
   {
     name: 'play',
-    description: 'Plays a song or playlist on Youtube',
+    description: messages.playDescription,
     options: [
       {
         name: 'input',
         type: ApplicationCommandOptionType.String,
-        description: 'The url or keyword to search videos or playlist on Youtube',
+        description: messages.inputPlayDescription,
         required: true,
       },
     ],
   },
   {
     name: 'skip',
-    description: 'Skip to the next song in the queue',
+    description: messages.skipDescription,
   },
   {
     name: 'queue',
-    description: 'See the music queue',
+    description: messages.queueDescription,
   },
   {
     name: 'pause',
-    description: 'Pauses the song that is currently playing',
+    description: messages.pauseDescription,
   },
   {
     name: 'resume',
-    description: 'Resume playback of the current song',
+    description: messages.resumeDescription,
   },
   {
     name: 'nowplaying',
-    description: 'See the song that is currently playing',
+    description: messages.nowPlayingDescription,
   },
   {
     name: 'shuffle',
-    description: 'Shuffle the queue',
+    description: messages.shuffleDescription,
   },
   {
     name: 'jump',
-    description: 'Jump to song in queue by position',
+    description: messages.jumpDescription,
     options: [
       {
         name: 'position',
         type: ApplicationCommandOptionType.Number,
-        description: 'The position of song in queue',
+        description: messages.jumpPostionDescription,
         required: true,
       },
     ],
   },
   {
     name: 'remove',
-    description: 'Remove song in queue by position',
+    description: messages.removeDescription,
     options: [
       {
         name: 'position',
         type: ApplicationCommandOptionType.Number,
-        description: 'The position of song in queue',
+        description: messages.removePostionDescription,
         required: true,
       },
     ],
   },
   {
     name: 'ping',
-    description: 'See the ping to server',
+    description: messages.pingDescription,
   },
   {
     name: 'leave',
-    description: 'Leave the voice channel',
+    description: messages.leaveDescription,
   },
   {
     name: 'help',
-    description: 'See the help for this bot',
+    description: messages.helpDescription,
+  },
+  {
+    name: 'soundcloud',
+    description: messages.soundcloudDescription,
+    options: [
+      {
+        name: 'input',
+        type: ApplicationCommandOptionType.String,
+        description: messages.inputSoundcloudDescription,
+        required: true,
+      },
+    ],
   },
 ];

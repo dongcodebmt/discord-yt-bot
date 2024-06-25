@@ -3,7 +3,7 @@ export const youtubeVideoRegex = new RegExp(
 );
 
 export const youtubePlaylistRegex = new RegExp(
-  /(?!.*\?.*\bv=)https:\/\/www\.youtube\.com\/.*\?.*\blist=.*/,
+  /https:\/\/www\.youtube\.com\/.*\?.*\blist=.*/,
 );
 
 export const soundCloudTrackRegex = new RegExp(
