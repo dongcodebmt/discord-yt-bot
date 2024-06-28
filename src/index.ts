@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits } from 'discord.js';
+import { generateDependencyReport } from '@discordjs/voice';
 import { config } from 'dotenv';
 config();
 import { BOT_TOKEN } from '@/constants/config';
@@ -18,6 +19,7 @@ const client = new Client({
 });
 
 client.on('ready', () => {
+  console.log(generateDependencyReport());
   console.log('🏃‍♂️ Bot is online! 💨');
 });
 

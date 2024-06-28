@@ -1,26 +1,26 @@
 import { SoundCloudPlugin, SearchType } from '@distube/soundcloud';
 import { Song as SoundCloudSong, Playlist as SoundCloudPlaylist } from 'distube';
 import { soundCloudPlaylistRegex, soundCloudTrackRegex } from '@/constants/regex';
-import { Playlist, Platform, Song, ItemType } from '@/types';
+import { Playlist, Platform, Song, ItemType, IMusicService } from '@/types';
 
-export class SoundCloudService {
+export class SoundCloudService implements IMusicService {
   private plugin: SoundCloudPlugin = new SoundCloudPlugin();
 
-  public async getStream(url: string): Promise<string> {
+  public async getStreamURLAsync(url: string): Promise<string> {
     return this.plugin.getStreamURL(<SoundCloudSong>{ url });
   }
 
-  public async getResult(content: string): Promise<Playlist | Song> {
-    if (this.isPlaylist(content)) {
-      return this.getPlaylist(content);
+  public async getAsync(query: string): Promise<Playlist | Song> {
+    if (this.isPlaylist(query)) {
+      return this.getPlaylistAsync(query);
     }
-    if (this.isTrack(content)) {
-      return this.getSong(content);
+    if (this.isTrack(query)) {
+      return this.getSongAsync(query);
     }
-    return this.searchSong(content);
+    return this.searchAsync(query);
   }
 
-  public async getPlaylist(url: string): Promise<Playlist> {
+  public async getPlaylistAsync(url: string): Promise<Playlist> {
     const result = await this.plugin.resolve(url, {});
     if (!(result instanceof SoundCloudPlaylist)) {
       throw new Error();
@@ -32,7 +32,7 @@ export class SoundCloudService {
         author: item.uploader.name,
         thumbnail: item.thumbnail,
         url: item.url, 
-        platform: Platform.SOUND_CLOUD
+        platform: Platform.SOUNDCLOUD
       }
     ));
     return <Playlist> {
@@ -43,7 +43,7 @@ export class SoundCloudService {
     };
   }
 
-  public async getSong(url: string): Promise<Song> {
+  public async getSongAsync(url: string): Promise<Song> {
     const result = await this.plugin.resolve(url, {});
     if (!(result instanceof SoundCloudSong)) {
       throw new Error();
@@ -55,12 +55,12 @@ export class SoundCloudService {
       author: song.uploader.name,
       thumbnail: song.thumbnail,
       url: song.url,
-      platform: Platform.SOUND_CLOUD
+      platform: Platform.SOUNDCLOUD
     };
   }
 
-  public async searchSong(keyword: string): Promise<Song> {
-    const result = await this.plugin.search(keyword, SearchType.Track, 1 );
+  public async searchAsync(query: string): Promise<Song> {
+    const result = await this.plugin.search(query, SearchType.Track, 1 );
     if (result.length === 0) throw new Error();
     const item = result.at(0) as SoundCloudSong;
     return <Song> {
@@ -69,16 +69,16 @@ export class SoundCloudService {
       author: item.uploader.name,
       thumbnail: item.thumbnail,
       url: item.url,
-      platform: Platform.YOUTUBE
+      platform: Platform.SOUNDCLOUD
     };
   }
 
-  public isPlaylist(url: string): boolean {
+  private isPlaylist(url: string): boolean {
     const paths = url.match(soundCloudPlaylistRegex);
     return paths != null;
   }
   
-  public isTrack(url: string): boolean {
+  private isTrack(url: string): boolean {
     const paths = url.match(soundCloudTrackRegex);
     return paths != null;
   }

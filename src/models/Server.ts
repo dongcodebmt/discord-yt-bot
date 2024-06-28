@@ -1,5 +1,5 @@
 import { servers } from '@/servers';
-import { QueueItem, Platform } from '@/types';
+import { QueueItem } from '@/types';
 import {
   AudioPlayer,
   AudioPlayerStatus,
@@ -10,9 +10,10 @@ import {
   VoiceConnectionDisconnectReason,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { shuffle } from '@/utils';
-import { YoutubeService } from '@/services/youtube';
-import { SoundCloudService } from '@/services/soundcould';
+import { shuffle, ffmpegExists } from '@/utils';
+import { DisTubeStream, Options } from 'distube';
+import { MusicService } from '@/services';
+import ffmpegPath from 'ffmpeg-static';
 
 export class Server {
   public guildId: string;
@@ -149,26 +150,29 @@ export class Server {
 
   public async play(): Promise<void> {
     try {
-      if (this.queue.length > 0) {
-        this.playing = this.queue.shift() as QueueItem;
-        let stream: any;
-        const highWaterMark = 1024 * 1024 * 10;
-        if (this.playing?.song.platform === Platform.YOUTUBE) {
-          const service = new YoutubeService();
-          stream = await service.getStream(this.playing?.song.url);
-        }
-        if (this.playing?.song.platform === Platform.SOUND_CLOUD) {
-          const service = new SoundCloudService();
-          stream = await service.getStream(this.playing?.song.url);
-        }
-        const audioResource = createAudioResource(stream);
-        this.audioPlayer.play(audioResource);
-      } else {
+      if (!ffmpegPath || this.queue.length <= 0) {
         this.playing = undefined;
         this.audioPlayer.stop();
+        return;
       }
+
+      this.playing = this.queue.shift() as QueueItem;
+      const service: MusicService = new MusicService(this.playing.song.platform);
+      const streamUrl = await service.getStreamURLAsync(this.playing.song.url);
+      const streamOptions: Options = new Options({});
+      if (await ffmpegExists()) {
+        streamOptions.ffmpeg.path = 'ffmpeg';
+      } else {
+        streamOptions.ffmpeg.path = ffmpegPath;
+      }
+      const stream: any = new DisTubeStream(streamUrl, streamOptions);
+      this.audioPlayer.play(stream.audioResource);
+      stream.volume = 100;
+      stream.spawn();
     } catch (e) {
       this.play();
     }
   }
 }
+
+

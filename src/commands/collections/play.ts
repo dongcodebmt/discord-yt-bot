@@ -1,7 +1,7 @@
 import messages from '@/constants/messages';
 import { Server } from '@/models/Server';
 import { servers } from '@/servers';
-import { YoutubeService } from '@/services/youtube';;
+import { MusicService } from '@/services';
 import { Platform, Playlist, QueueItem, Song, ItemType } from '@/types';
 import {
   entersState,
@@ -13,7 +13,7 @@ import { createPlayMessage } from '@/commands/messages/playMessage';
 
 export const play = {
   name: 'play',
-  execute: async (interaction: CommandInteraction): Promise<void> => {
+  execute: async (interaction: CommandInteraction, platform: Platform = Platform.YOUTUBE): Promise<void> => {
     await interaction.deferReply();
     let server = servers.get(interaction.guildId as string);
     if (!server) {
@@ -50,49 +50,46 @@ export const play = {
       await interaction.followUp(messages.failToJoinVoiceChannel);
       return;
     }
+
     try {
-      const service = new YoutubeService();
+      const service: MusicService = new MusicService(platform);
       const input = interaction.options.get('input')!.value! as string;
-      const result = await service.getResult(input);
+      const result = await service.getAsync(input);
       const requester = interaction.member?.user.username ?? '';
+      let payload: any = { platform, requester };
       if ((result as Playlist).songs) {
         const playlist = (result as Playlist);
         await server.addSongs(playlist.songs.map(item => <QueueItem>{ song: item, requester }));
-        interaction.followUp({
-          embeds: [
-            createPlayMessage({
-              title: playlist.title,
-              url: input,
-              author: playlist.author,
-              thumbnail: playlist.thumbnail,
-              type: ItemType.PLAYLIST,
-              length: playlist.songs.length,
-              platform: Platform.YOUTUBE,
-              requester
-            }),
-          ],
-        });
+        payload = {
+          ...payload,
+          title: playlist.title,
+          url: input,
+          author: playlist.author,
+          thumbnail: playlist.thumbnail,
+          length: playlist.songs.length,
+          type: ItemType.PLAYLIST
+        };
       } else {
         const song = (result as Song);
         await server.addSongs([{
           song: result as Song,
           requester: interaction.member?.user.username ?? ''
         }]);
-        interaction.followUp({
-          embeds: [
-            createPlayMessage({
-              title: song.title,
-              url: song.url,
-              author: song.author,
-              thumbnail: song.thumbnail,
-              type: ItemType.VIDEO,
-              length: song.duration,
-              platform: Platform.YOUTUBE,
-              requester
-            }),
-          ],
-        });
+        payload = {
+          ...payload,
+          title: song.title,
+          url: song.url,
+          author: song.author,
+          thumbnail: song.thumbnail,
+          length: song.duration,
+          type: ItemType.VIDEO,
+        };
       }
+      interaction.followUp({
+        embeds: [
+          createPlayMessage(payload),
+        ],
+      });
     } catch (error) {
       await interaction.followUp(messages.failToPlay);
     }

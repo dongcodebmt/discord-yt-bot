@@ -1,9 +1,9 @@
 import { youtubePlaylistRegex, youtubeVideoRegex } from '@/constants/regex';
-import { Playlist, Platform, Song, ItemType } from '@/types';
+import { Playlist, Platform, Song, ItemType, IMusicService } from '@/types';
 import { YouTubePlugin, YouTubePlaylist, YouTubeSong, SearchResultType, YouTubeSearchResultSong } from '@distube/youtube';
 import fs from 'fs';
 
-export class YoutubeService {
+export class YoutubeService implements IMusicService {
   private plugin: YouTubePlugin = new YouTubePlugin();
 
   constructor() {
@@ -14,22 +14,22 @@ export class YoutubeService {
       });
     }
   }
-
-  public async getStream(url: string): Promise<string> {
+  
+  public async getStreamURLAsync(url: string): Promise<string> {
     return this.plugin.getStreamURL(<YouTubeSong>{ url });
   }
 
-  public async getResult(content: string): Promise<Playlist | Song> {
-    if (this.isPlaylist(content)) {
-      return this.getPlaylist(content);
+  public async getAsync(query: string): Promise<Playlist | Song> {
+    if (this.isPlaylist(query)) {
+      return this.getPlaylistAsync(query);
     }
-    if (this.isVideo(content)) {
-      return this.getSong(content);
+    if (this.isVideo(query)) {
+      return this.getSongAsync(query);
     }
-    return this.searchSong(content);
+    return this.searchAsync(query);
   }
 
-  public async getPlaylist(url: string): Promise<Playlist> {
+  public async getPlaylistAsync(url: string): Promise<Playlist> {
     const result = await this.plugin.resolve(url, {});
     if (!(result instanceof YouTubePlaylist)) {
       throw new Error();
@@ -52,7 +52,7 @@ export class YoutubeService {
     };
   }
 
-  public async getSong(url: string): Promise<Song> {
+  public async getSongAsync(url: string): Promise<Song> {
     const result = await this.plugin.resolve(url, {});
     if (!(result instanceof YouTubeSong)) {
       throw new Error();
@@ -67,8 +67,8 @@ export class YoutubeService {
     };
   }
 
-  public async searchSong(keyword: string): Promise<Song> {
-    const result = await this.plugin.search(keyword, { type: SearchResultType.VIDEO, limit: 1 });
+  public async searchAsync(query: string): Promise<Song> {
+    const result = await this.plugin.search(query, { type: SearchResultType.VIDEO, limit: 1 });
     if (result.length === 0) throw new Error();
     const item = result.at(0) as YouTubeSearchResultSong;
     return <Song> {
@@ -81,12 +81,12 @@ export class YoutubeService {
     };
   }
 
-  public isPlaylist(url: string): boolean {
+  private isPlaylist(url: string): boolean {
     const paths = url.match(youtubePlaylistRegex);
     return paths != null;
   }
   
-  public isVideo(url: string): boolean {
+  private isVideo(url: string): boolean {
     const paths = url.match(youtubeVideoRegex);
     return paths != null;
   }
