@@ -24,7 +24,7 @@ export const createNowPlayingMessage = (payload: {
     inline: true,
   };
   const length: APIEmbedField = {
-    name: messages.length,
+    name: messages.duration,
     value: formatSeconds(payload.length),
     inline: true,
   };

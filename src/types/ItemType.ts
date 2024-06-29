@@ -1,5 +1,5 @@
 export enum ItemType {
-  PLAYLIST = 'playlist',
-  VIDEO = 'video',
-  TRACK = 'track',
+  PLAYLIST = 'Playlist',
+  VIDEO = 'Video',
+  TRACK = 'Track',
 }
