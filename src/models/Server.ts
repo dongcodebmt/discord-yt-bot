@@ -166,6 +166,9 @@ export class Server {
         streamOptions.ffmpeg.path = ffmpegPath;
       }
       const stream: any = new DisTubeStream(streamUrl, streamOptions);
+      stream.on('error', (error: NodeJS.ErrnoException) => {
+        if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
+      });
       this.audioPlayer.play(stream.audioResource);
       stream.volume = 100;
       stream.spawn();
