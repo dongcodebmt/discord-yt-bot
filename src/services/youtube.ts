@@ -1,16 +1,15 @@
 import { youtubePlaylistRegex, youtubeVideoRegex } from '@/constants/regex';
 import { Playlist, Platform, Song, ItemType, IMusicService } from '@/types';
 import { YouTubePlugin, YouTubePlaylist, YouTubeSong, SearchResultType, YouTubeSearchResultSong } from '@distube/youtube';
-import fs from 'fs';
+import { YOUTUBE_COOKIES } from '@/constants/config';
 
 export class YoutubeService implements IMusicService {
   private plugin: YouTubePlugin = new YouTubePlugin();
 
   constructor() {
-    const dir = 'cookies.json';
-    if (fs.existsSync(dir)) {
+    if (YOUTUBE_COOKIES.length > 0) {
       this.plugin = new YouTubePlugin({
-        cookies: JSON.parse(fs.readFileSync(dir, 'utf-8'))
+        cookies: YOUTUBE_COOKIES
       });
     }
   }

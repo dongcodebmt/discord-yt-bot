@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 config();
 import { BOT_TOKEN, CMD_PREFLIX } from '@/constants/config';
 import { run } from '@/commands';
+import { messageEvent } from '@/messages';
 
 if (process.env.NODE_ENV === 'production') {
   // DO SOMETHING
@@ -39,6 +40,7 @@ client.once('disconnect', () => {
 (async () => {
   try {
     await client.login(BOT_TOKEN);
+    messageEvent(client);
     run(client);
   } catch (e: any) {
     console.log('Error:', e.stack);

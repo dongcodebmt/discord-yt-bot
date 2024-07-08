@@ -9,7 +9,7 @@ Discord bot to play music
 - Create a discord app at [developer portal](https://discord.com/developers/applications?new_application=true)
 - Setup permissions
   - Scopes: `bot`, `application.commands`
-  - Bot permissions: `Send Messages`, `Embed Links`, `Use Slash Commands`, `Connect`, `Speak`
+  - Bot permissions: `Send Messages`, `Embed Links`, `Use Slash Commands`, `Connect`, `Speak`, `Manage Messages`
 - Clone this repo  
 - Create .env from example.env
   - `BOT_TOKEN=<token>`

@@ -1,5 +1,6 @@
 import { Colors } from 'discord.js';
 import { Platform } from '@/types';
+import fs from 'fs';
 
 export const BOT_TOKEN = process.env.BOT_TOKEN;
 export const BOT_LANG = process.env.BOT_LANG ?? 'en';
@@ -20,3 +21,5 @@ export const PLATFORM = {
 };
 export const BOT_NAME = 'DongDev Bot';
 export const BOT_LOGO = 'https://www.dongdev.com/static/img/favicon.png';
+export const BAD_WORDS = fs.existsSync('badwords.json') ? JSON.parse(fs.readFileSync('badwords.json', 'utf-8')) : [];
+export const YOUTUBE_COOKIES = fs.existsSync('cookies.json') ? JSON.parse(fs.readFileSync('cookies.json', 'utf-8')) : [];

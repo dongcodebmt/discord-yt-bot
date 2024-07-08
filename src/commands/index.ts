@@ -1,6 +1,5 @@
 import messages from '@/constants/messages';
 import { Client } from 'discord.js';
-import { deploy } from '@/commands/collections/deploy';
 import { help } from '@/commands/collections/help';
 import { jump } from '@/commands/collections/jump';
 import { leave } from '@/commands/collections/leave';
@@ -16,8 +15,6 @@ import { skip } from '@/commands/collections/skip';
 import { Platform } from '@/types';
 
 export const run = (client: Client): void => {
-  deploy(client);
-
   client.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand() || !interaction.guildId) return;
     try {

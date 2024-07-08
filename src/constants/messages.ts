@@ -45,7 +45,9 @@ const multi = {
     leaveDescription: 'Thoát kênh thoại',
     helpDescription: 'Xem trợ giúp cho bot này',
     soundcloudDescription: 'Phát một bài hoặc playlist trên SoundCloud',
-    inputSoundcloudDescription: 'URL hoặc từ khóa để tìm kiếm bài hát hoặc playlist trên SoundCloud'
+    inputSoundcloudDescription: 'URL hoặc từ khóa để tìm kiếm bài hát hoặc playlist trên SoundCloud',
+    badWordMessage: '🤫 Đừng chat từ cấm nhé bạn tôi!',
+    inviteBlockMessage: '🤨 Đừng spam nhé bạn tôi!'
   },
   en: {
     error: '❌ Error!',
@@ -91,7 +93,9 @@ const multi = {
     leaveDescription: 'Leave the voice channel',
     helpDescription: 'See the help for this bot',
     soundcloudDescription: 'Plays a song or playlist on SoundCloud',
-    inputSoundcloudDescription: 'The url or keyword to search songs or playlist on SoundCloud'
+    inputSoundcloudDescription: 'The url or keyword to search songs or playlist on SoundCloud',
+    badWordMessage: '🤫 Don\'t swear!',
+    inviteBlockMessage: '🤨 Don\'t spam!'
   }
 }
 
