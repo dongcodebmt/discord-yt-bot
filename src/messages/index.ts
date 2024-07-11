@@ -2,7 +2,7 @@ import { Client, Message } from 'discord.js';
 import { deploy } from '@/commands/collections/deploy';
 import { CMD_PREFLIX } from '@/constants/config';
 import { messageFilter } from '@/messages/message-filter';
-import { guildInviteFilter } from '@/messages/guild-invite-filter';
+import { guildInviteFilter } from './guild-invite-filter';
 
 export const messageEvent = (client: Client): void => {
   client.on('messageCreate', async (message: Message) => {

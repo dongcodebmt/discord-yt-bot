@@ -10,10 +10,8 @@ import {
   VoiceConnectionDisconnectReason,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { shuffle, ffmpegExists } from '@/utils';
-import { DisTubeStream, Options } from 'distube';
+import { shuffle } from '@/utils';
 import { MusicService } from '@/services';
-import ffmpegPath from 'ffmpeg-static';
 
 export class Server {
   public guildId: string;
@@ -150,7 +148,7 @@ export class Server {
 
   public async play(): Promise<void> {
     try {
-      if (!ffmpegPath || this.queue.length <= 0) {
+      if (this.queue.length <= 0) {
         this.playing = undefined;
         this.audioPlayer.stop();
         return;
@@ -159,19 +157,8 @@ export class Server {
       this.playing = this.queue.shift() as QueueItem;
       const service: MusicService = new MusicService(this.playing.song.platform);
       const streamUrl = await service.getStreamURLAsync(this.playing.song.url);
-      const streamOptions: Options = new Options({});
-      if (await ffmpegExists()) {
-        streamOptions.ffmpeg.path = 'ffmpeg';
-      } else {
-        streamOptions.ffmpeg.path = ffmpegPath;
-      }
-      const stream: any = new DisTubeStream(streamUrl, streamOptions);
-      stream.on('error', (error: NodeJS.ErrnoException) => {
-        if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
-      });
-      this.audioPlayer.play(stream.audioResource);
-      stream.volume = 100;
-      stream.spawn();
+      const stream = createAudioResource(streamUrl);
+      this.audioPlayer.play(stream);
     } catch (e) {
       this.play();
     }
