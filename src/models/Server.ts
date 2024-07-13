@@ -8,10 +8,10 @@ import {
   entersState,
   VoiceConnection,
   VoiceConnectionDisconnectReason,
-  VoiceConnectionStatus,
+  VoiceConnectionStatus
 } from '@discordjs/voice';
 import { shuffle } from '@/utils';
-import { MusicService } from '@/services';
+import { MusicService, DiscordStream } from '@/services';
 
 export class Server {
   public guildId: string;
@@ -36,7 +36,7 @@ export class Server {
           switching voice channels. This is also the same code for the bot being kicked from the voice channel,
           so we allow 5 seconds to figure out which scenario it is. If the bot has been kicked, we should destroy
           the voice connection.
-				*/
+        */
         if (
           newState.reason === VoiceConnectionDisconnectReason.WebSocketClose &&
           newState.closeCode === 4014
@@ -63,10 +63,10 @@ export class Server {
           newState.status === VoiceConnectionStatus.Signalling)
       ) {
         /*
-					In the Signalling or Connecting states, we set a 20 second time limit for the connection to become ready
-					before destroying the voice connection. This stops the voice connection permanently existing in one of these
-					states.
-				*/
+          In the Signalling or Connecting states, we set a 20 second time limit for the connection to become ready
+          before destroying the voice connection. This stops the voice connection permanently existing in one of these
+          states.
+        */
         this.isReady = true;
         try {
           await entersState(
@@ -153,12 +153,12 @@ export class Server {
         this.audioPlayer.stop();
         return;
       }
-
       this.playing = this.queue.shift() as QueueItem;
       const service: MusicService = new MusicService(this.playing.song.platform);
       const streamUrl = await service.getStreamURLAsync(this.playing.song.url);
-      const stream = createAudioResource(streamUrl);
-      this.audioPlayer.play(stream);
+      const stream: any = new DiscordStream(streamUrl);
+      this.audioPlayer.play(stream.audioResource);
+      stream.spawn();
     } catch (e) {
       this.play();
     }
