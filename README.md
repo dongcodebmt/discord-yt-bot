@@ -14,10 +14,6 @@ Discord bot to play music
 - Create .env from example.env
   - `BOT_TOKEN=<token>`
   - `BOT_LANG=<en|vi>`
-- Install EditThisCookie extension for your browser.
-- Go to YouTube.
-- Click on the extension icon and click "Export" icon.
-- Create a json file named `cookies.json` and paste your cookies into the json file.
 - Build docker image and run
 ```
 docker compose up -d --build
