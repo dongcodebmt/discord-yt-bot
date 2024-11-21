@@ -1,9 +1,10 @@
 import { Transform, TransformCallback } from 'stream';
-import { ChildProcess, spawn } from 'child_process';
+import { ChildProcess, spawn, exec } from 'child_process';
 import { StreamType, createAudioResource, AudioResource } from '@discordjs/voice';
+const pathToFfmpeg = require('ffmpeg-static');
 
 export class DiscordStream {
-  private readonly ffmpegPath: string = 'ffmpeg';
+  private ffmpegPath: string = 'ffmpeg';
   private args: string[] = [];
   private process?: ChildProcess;
   private stream: VolumeTransformer;
@@ -23,6 +24,13 @@ export class DiscordStream {
       'pipe:1'
     ];
 
+    exec('ffmpeg -version', (error, stdout, stderr) => {
+      if (error || stderr) {
+        this.ffmpegPath = pathToFfmpeg;
+        return;
+      }
+    });
+
     this.stream = new VolumeTransformer();
     this.stream
       .on('close', () => this.kill())
@@ -35,7 +43,7 @@ export class DiscordStream {
   }
 
   spawn() {
-    console.log(this.args.join(' '))
+    // console.log(this.args.join(' '))
     this.process = spawn(this.ffmpegPath, this.args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: false,
@@ -67,7 +75,7 @@ export class DiscordStream {
     if (!this.stream.destroyed) this.stream.destroy();
     if (this.process && !this.process.killed) this.process.kill('SIGKILL');
   }
-  
+
   setVolume(volume: number) {
     this.stream.vol = volume;
   }
