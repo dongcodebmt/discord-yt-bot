@@ -1,17 +1,21 @@
 import { youtubePlaylistRegex, youtubeVideoRegex } from '@/constants/regex';
 import { Playlist, Platform, Song, ItemType, IMusicService } from '@/types';
-import { YouTubePlugin, YouTubePlaylist, YouTubeSong, SearchResultType, YouTubeSearchResultSong } from '@distube/youtube';
+import { YouTubePlugin, YouTubePluginOptions, YouTubePlaylist, YouTubeSong, SearchResultType, YouTubeSearchResultSong } from '@distube/youtube';
 import { YOUTUBE_COOKIES } from '@/constants/config';
 
 export class YoutubeService implements IMusicService {
   private plugin: YouTubePlugin = new YouTubePlugin();
 
   constructor() {
+    let options: YouTubePluginOptions = {
+      ytdlOptions: {
+        playerClients: ["IOS", "WEB_CREATOR"]
+      }
+    };
     if (YOUTUBE_COOKIES.length > 0) {
-      this.plugin = new YouTubePlugin({
-        cookies: YOUTUBE_COOKIES
-      });
+      options.cookies = YOUTUBE_COOKIES
     }
+    this.plugin = new YouTubePlugin(options);
   }
   
   public async getStreamURLAsync(url: string): Promise<string> {
