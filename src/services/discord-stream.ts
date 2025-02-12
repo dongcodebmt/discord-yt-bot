@@ -43,7 +43,6 @@ export class DiscordStream {
   }
 
   spawn() {
-    // console.log(this.args.join(' '))
     this.process = spawn(this.ffmpegPath, this.args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: false,

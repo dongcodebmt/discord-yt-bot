@@ -9,7 +9,7 @@ export class YoutubeService implements IMusicService {
   constructor() {
     let options: YouTubePluginOptions = {
       ytdlOptions: {
-        playerClients: ["IOS", "WEB_CREATOR"]
+        // playerClients: ["IOS", "WEB_CREATOR"]
       }
     };
     if (YOUTUBE_COOKIES.length > 0) {
