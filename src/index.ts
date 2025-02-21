@@ -1,8 +1,8 @@
-import { Client, GatewayIntentBits, ActivityType } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
 import { generateDependencyReport } from '@discordjs/voice';
 import { config } from 'dotenv';
 config();
-import { BOT_TOKEN, CMD_PREFLIX } from '@/constants/config';
+import { BOT_TOKEN, BOT_DEFAULT_ACTIVITY } from '@/constants/config';
 import { run } from '@/commands';
 import { messageEvent } from '@/messages';
 
@@ -23,10 +23,7 @@ client.on('ready', () => {
   console.log(generateDependencyReport());
   console.log('🏃‍♂️ Bot is online! 💨');
 
-  client.user?.setActivity({
-    name: `music | ${CMD_PREFLIX}help`,
-    type: ActivityType.Playing
-  });
+  client.user?.setActivity(BOT_DEFAULT_ACTIVITY);
 });
 
 client.once('reconnecting', () => {

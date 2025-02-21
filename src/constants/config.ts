@@ -1,4 +1,4 @@
-import { Colors } from 'discord.js';
+import { Colors, ActivityType, ActivityOptions } from 'discord.js';
 import { Platform } from '@/types';
 import fs from 'fs';
 
@@ -23,3 +23,7 @@ export const BOT_NAME = 'DongDev Bot';
 export const BOT_LOGO = 'https://www.dongdev.com/static/img/favicon.png';
 export const BAD_WORDS = fs.existsSync('badwords.json') ? JSON.parse(fs.readFileSync('badwords.json', 'utf-8')) : [];
 export const YOUTUBE_COOKIES = fs.existsSync('cookies.json') ? JSON.parse(fs.readFileSync('cookies.json', 'utf-8')) : [];
+export const BOT_DEFAULT_ACTIVITY: ActivityOptions = {
+  name: `music | ${CMD_PREFLIX}help`,
+  type: ActivityType.Playing
+};

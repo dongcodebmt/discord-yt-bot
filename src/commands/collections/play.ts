@@ -8,12 +8,12 @@ import {
   joinVoiceChannel,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { CommandInteraction, GuildMember, Client } from 'discord.js';
 import { createPlayMessage } from '@/commands/messages/playMessage';
 
 export const play = {
   name: 'play',
-  execute: async (interaction: CommandInteraction, platform: Platform = Platform.YOUTUBE): Promise<void> => {
+  execute: async (interaction: CommandInteraction, client: Client, platform: Platform = Platform.YOUTUBE): Promise<void> => {
     await interaction.deferReply();
     let server = servers.get(interaction.guildId as string);
     if (!server) {
@@ -29,6 +29,7 @@ export const play = {
             adapterCreator: channel.guild.voiceAdapterCreator,
           }),
           interaction.guildId as string,
+          client
         );
         servers.set(interaction.guildId as string, server);
       }

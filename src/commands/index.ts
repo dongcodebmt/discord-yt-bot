@@ -1,7 +1,5 @@
 import messages from '@/constants/messages';
-import { Client, ActivityType, ActivityOptions } from 'discord.js';
-import { servers } from '@/servers';
-import { CMD_PREFLIX } from '@/constants/config';
+import { Client } from 'discord.js';
 import { help } from '@/commands/collections/help';
 import { jump } from '@/commands/collections/jump';
 import { leave } from '@/commands/collections/leave';
@@ -22,61 +20,47 @@ export const run = (client: Client): void => {
     try {
       switch (interaction.commandName) {
         case play.name:
-          await play.execute(interaction);
+          play.execute(interaction, client);
           break;
         case Platform.SOUNDCLOUD.toLocaleLowerCase():
-          await play.execute(interaction, Platform.SOUNDCLOUD);
+          play.execute(interaction, client, Platform.SOUNDCLOUD);
           break;
         case skip.name:
-          await skip.execute(interaction);
+          skip.execute(interaction);
           break;
         case pause.name:
-          await pause.execute(interaction);
+          pause.execute(interaction);
           break;
         case resume.name:
-          await resume.execute(interaction);
+          resume.execute(interaction);
           break;
         case leave.name:
-          await leave.execute(interaction);
+          leave.execute(interaction);
           break;
         case nowPlaying.name:
-          await nowPlaying.execute(interaction);
+          nowPlaying.execute(interaction);
           break;
         case queue.name:
-          await queue.execute(interaction);
+          queue.execute(interaction);
           break;
         case jump.name:
-          await jump.execute(interaction);
+          jump.execute(interaction);
           break;
         case ping.name:
-          await ping.execute(client, interaction);
+          ping.execute(client, interaction);
           break;
         case remove.name:
-          await remove.execute(interaction);
+          remove.execute(interaction);
           break;
         case shuffle.name:
-          await shuffle.execute(interaction);
+          shuffle.execute(interaction);
           break;
         case help.name:
-          await help.execute(interaction);
+          help.execute(interaction);
           break;
       }
     } catch (e) {
       interaction.reply(messages.error);
     }
-
-    const server = servers.get(interaction.guildId as string);
-    let activity: ActivityOptions = {
-      name: `music | ${CMD_PREFLIX}help`,
-      type: ActivityType.Playing
-    };
-    if (server && server.playing) {
-      activity = {
-        name: server.playing?.song.title,
-        type: ActivityType.Streaming,
-        url: server.playing?.song.url
-      }
-    }
-    client.user?.setActivity(activity);
   });
 };

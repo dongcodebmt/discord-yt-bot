@@ -9,8 +9,10 @@ import {
   VoiceConnectionDisconnectReason,
   VoiceConnectionStatus
 } from '@discordjs/voice';
+import { Client, ActivityType, ActivityOptions } from 'discord.js';
 import { shuffle } from '@/utils';
 import { MusicService, DiscordStream } from '@/services';
+import { BOT_DEFAULT_ACTIVITY } from '@/constants/config';
 
 export class Server {
   public guildId: string;
@@ -18,14 +20,16 @@ export class Server {
   public queue: QueueItem[];
   public readonly voiceConnection: VoiceConnection;
   public readonly audioPlayer: AudioPlayer;
+  private client: Client;
   private isReady = false;
 
-  constructor(voiceConnection: VoiceConnection, guildId: string) {
+  constructor(voiceConnection: VoiceConnection, guildId: string, client: Client) {
     this.voiceConnection = voiceConnection;
     this.audioPlayer = createAudioPlayer();
     this.queue = [];
     this.playing = undefined;
     this.guildId = guildId;
+    this.client = client;
 
     this.voiceConnection.on('stateChange', async (_, newState) => {
       if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -109,6 +113,7 @@ export class Server {
     this.playing = undefined;
     this.queue = [];
     this.audioPlayer.stop();
+    this.setActivity();
   }
 
   public leave(): void {
@@ -116,15 +121,18 @@ export class Server {
       this.voiceConnection.destroy();
     }
     this.stop();
+    this.setActivity();
     servers.delete(this.guildId);
   }
 
   public pause(): void {
     this.audioPlayer.pause();
+    this.setActivity();
   }
 
   public resume(): void {
     this.audioPlayer.unpause();
+    this.setActivity(this.getCurrentActivity());
   }
 
   public async jump(position: number): Promise<QueueItem> {
@@ -150,6 +158,7 @@ export class Server {
       if (this.queue.length <= 0) {
         this.playing = undefined;
         this.audioPlayer.stop();
+        this.setActivity();
         return;
       }
       this.playing = this.queue.shift() as QueueItem;
@@ -158,8 +167,23 @@ export class Server {
       const stream: any = new DiscordStream(streamUrl);
       this.audioPlayer.play(stream.audioResource);
       stream.spawn();
+      this.setActivity(this.getCurrentActivity());
     } catch (e) {
       this.play();
+    }
+  }
+
+  private setActivity(opts: ActivityOptions = BOT_DEFAULT_ACTIVITY): void {
+    this.client.user?.setActivity(opts);
+  }
+
+  private getCurrentActivity(): ActivityOptions {
+    if (!this.playing) {
+      return BOT_DEFAULT_ACTIVITY;
+    }
+    return {
+      name: this.playing.song.title,
+      type: ActivityType.Playing
     }
   }
 }

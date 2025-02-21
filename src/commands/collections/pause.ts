@@ -13,7 +13,7 @@ export const pause = {
       return;
     }
     if (server.audioPlayer.state.status === AudioPlayerStatus.Playing) {
-      server.audioPlayer.pause();
+      server.pause();
       await interaction.followUp(messages.paused);
       return;
     }

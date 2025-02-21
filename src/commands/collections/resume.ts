@@ -13,7 +13,7 @@ export const resume = {
       return;
     }
     if (server.audioPlayer.state.status === AudioPlayerStatus.Paused) {
-      server.audioPlayer.unpause();
+      server.resume();
       await interaction.followUp(messages.resumed);
       return;
     }
