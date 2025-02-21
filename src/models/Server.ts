@@ -4,7 +4,6 @@ import {
   AudioPlayer,
   AudioPlayerStatus,
   createAudioPlayer,
-  createAudioResource,
   entersState,
   VoiceConnection,
   VoiceConnectionDisconnectReason,
