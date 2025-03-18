@@ -1,25 +1,29 @@
 import { youtubePlaylistRegex, youtubeVideoRegex } from '@/constants/regex';
-import { Playlist, Platform, Song, ItemType, IMusicService } from '@/types';
-import { YouTubePlugin, YouTubePluginOptions, YouTubePlaylist, YouTubeSong, SearchResultType, YouTubeSearchResultSong } from '@distube/youtube';
+import { Playlist, Platform, Song, IMusicService } from '@/types';
 import { YOUTUBE_COOKIES } from '@/constants/config';
+import { youtubeDl, Flags } from 'youtube-dl-exec';
 
 export class YoutubeService implements IMusicService {
-  private plugin: YouTubePlugin = new YouTubePlugin();
+  private flags: Flags = {
+    dumpSingleJson: true,
+    noWarnings: true,
+    noCheckCertificates: true,
+    preferFreeFormats: true,
+    skipDownload: true,
+    flatPlaylist: true,
+    simulate: true,
+    addHeader: ['referer:youtube.com', 'user-agent:googlebot']
+  }
 
   constructor() {
-    let options: YouTubePluginOptions = {
-      ytdlOptions: {
-        // playerClients: ["IOS", "WEB_CREATOR"]
-      }
-    };
-    if (YOUTUBE_COOKIES.length > 0) {
-      options.cookies = YOUTUBE_COOKIES
+    if (YOUTUBE_COOKIES) {
+      this.flags = {...this.flags, cookies: YOUTUBE_COOKIES };
     }
-    this.plugin = new YouTubePlugin(options);
   }
-  
+
   public async getStreamURLAsync(url: string): Promise<string> {
-    return this.plugin.getStreamURL(<YouTubeSong>{ url });
+    const result = await youtubeDl(url, { ...this.flags, format: 'bestaudio' }) as any;
+    return result.url;
   }
 
   public async getAsync(query: string): Promise<Playlist | Song> {
@@ -33,52 +37,51 @@ export class YoutubeService implements IMusicService {
   }
 
   public async getPlaylistAsync(url: string): Promise<Playlist> {
-    const result = await this.plugin.resolve(url, {});
-    if (!(result instanceof YouTubePlaylist)) {
-      throw new Error();
-    }
-    const songs: Song[] = result.songs.map(item => (
-      <Song> {
-        title: item.name,
+    const result = await youtubeDl(url, this.flags) as any;
+    
+    if (result.entries.length === 0) throw new Error();
+    const songs: Song[] = result.entries.map((item: any) => (
+      <Song>{
+        title: item.title,
         duration: item.duration,
-        author: item.uploader.name,
-        thumbnail: item.thumbnail,
-        url: item.url, 
+        author: item.uploader,
+        thumbnail: item.thumbnails.at(0).url,
+        url: item.url,
         platform: Platform.YOUTUBE
       }
     ));
-    return <Playlist> {
-      title: result.name,
-      thumbnail: result.thumbnail,
-      author: ItemType.PLAYLIST,
+
+    return <Playlist>{
+      title: result.title,
+      thumbnail: result.thumbnails.at(0).url,
+      author: result.uploader,
       songs
     };
   }
 
   public async getSongAsync(url: string): Promise<Song> {
-    const result = await this.plugin.resolve(url, {});
-    if (!(result instanceof YouTubeSong)) {
-      throw new Error();
-    }
-    return <Song> {
-      title: result.name,
+    const result = await youtubeDl(url, this.flags) as any;
+    if (!result) throw new Error();
+    return <Song>{
+      title: result.title,
       duration: result.duration,
-      author: result.uploader.name,
-      thumbnail: result.thumbnail,
+      author: result.uploader,
+      thumbnail: result.thumbnails.at(0).url,
       url: result.url,
       platform: Platform.YOUTUBE
     };
   }
 
   public async searchAsync(query: string): Promise<Song> {
-    const result = await this.plugin.search(query, { type: SearchResultType.VIDEO, limit: 1 });
-    if (result.length === 0) throw new Error();
-    const item = result.at(0) as YouTubeSearchResultSong;
-    return <Song> {
-      title: item.name,
+    const limit = 1;
+    const result = await youtubeDl(`ytsearch${limit}:${query}`, this.flags) as any;
+    if (result.entries.length === 0) throw new Error();
+    const item = result.entries.at(0);
+    return <Song>{
+      title: item.title,
       duration: item.duration,
-      author: item.uploader.name,
-      thumbnail: item.thumbnail,
+      author: item.uploader,
+      thumbnail: item.thumbnails.at(0).url,
       url: item.url,
       platform: Platform.YOUTUBE
     };
@@ -88,7 +91,7 @@ export class YoutubeService implements IMusicService {
     const paths = url.match(youtubePlaylistRegex);
     return paths != null;
   }
-  
+
   private isVideo(url: string): boolean {
     const paths = url.match(youtubeVideoRegex);
     return paths != null;

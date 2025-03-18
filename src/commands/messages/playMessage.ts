@@ -34,7 +34,7 @@ export const createPlayMessage = (payload: {
     value: payload.type,
     inline: true,
   };
-  const fields: APIEmbedField[] = payload.type == ItemType.PLAYLIST ? [length, type] : [author, length, type];
+  const fields: APIEmbedField[] = [author, length, type];
   return new EmbedBuilder()
     .setColor(MESSAGE_EMBED_COLOR)
     .setTitle(payload.title)
