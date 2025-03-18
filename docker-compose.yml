@@ -2,12 +2,12 @@ services:
   discord-yt-bot:
     image: ghcr.io/dongcodebmt/discord-yt-bot:latest
     container_name: discord-yt-bot
-    user: 1000:1000
     build:
       context: .
       dockerfile: ./Dockerfile
     volumes:
       - ./.env:/app/.env
+      - ./cookies.txt:/app/cookies.txt
     dns:
       - 1.1.1.1
       - 8.8.8.8
