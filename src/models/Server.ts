@@ -91,6 +91,8 @@ export class Server {
 
     // Configure audio player
     this.audioPlayer.on('stateChange', async (oldState, newState) => {
+      this.setActivity(newState.status === AudioPlayerStatus.Playing ? this.getCurrentActivity() : undefined);
+      
       if (
         newState.status === AudioPlayerStatus.Idle &&
         oldState.status !== AudioPlayerStatus.Idle
@@ -113,7 +115,6 @@ export class Server {
     this.playing = undefined;
     this.queue = [];
     this.audioPlayer.stop();
-    this.setActivity();
   }
 
   public leave(): void {
@@ -121,18 +122,15 @@ export class Server {
       this.voiceConnection.destroy();
     }
     this.stop();
-    this.setActivity();
     servers.delete(this.guildId);
   }
 
   public pause(): void {
     this.audioPlayer.pause();
-    this.setActivity();
   }
 
   public resume(): void {
     this.audioPlayer.unpause();
-    this.setActivity(this.getCurrentActivity());
   }
 
   public async jump(position: number): Promise<QueueItem> {
@@ -158,7 +156,6 @@ export class Server {
       if (this.queue.length <= 0) {
         this.playing = undefined;
         this.audioPlayer.stop();
-        this.setActivity();
         return;
       }
       this.playing = this.queue.shift() as QueueItem;
@@ -167,7 +164,6 @@ export class Server {
       const stream: any = new DiscordStream(streamUrl);
       this.audioPlayer.play(stream.audioResource);
       stream.spawn();
-      this.setActivity(this.getCurrentActivity());
     } catch (e) {
       this.play();
     }
@@ -182,7 +178,7 @@ export class Server {
       return BOT_DEFAULT_ACTIVITY;
     }
     return {
-      name: this.playing.song.title,
+      name: `${this.playing.song.title} | ${this.playing.song.author}`,
       type: ActivityType.Playing
     }
   }
