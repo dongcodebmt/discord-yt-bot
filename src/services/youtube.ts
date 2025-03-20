@@ -67,7 +67,7 @@ export class YoutubeService implements IMusicService {
       duration: result.duration,
       author: result.uploader,
       thumbnail: result.thumbnails.at(0).url,
-      url: result.url,
+      url: result.original_url,
       platform: Platform.YOUTUBE
     };
   }
