@@ -40,8 +40,8 @@ export class YoutubeService implements IMusicService {
 
   private async getPlaylistAsync(id: string): Promise<Playlist> {
     const result = await youtubeDl(id, this.flags) as any;
-    
     if (result.entries.length === 0) throw new Error();
+
     const songs: Song[] = result.entries.map((item: any) => (
       <Song>{
         title: item.title,
@@ -64,12 +64,13 @@ export class YoutubeService implements IMusicService {
   private async getSongAsync(id: string): Promise<Song> {
     const result = await youtubeDl(id, this.flags) as any;
     if (!result) throw new Error();
+
     return <Song>{
       title: result.title,
       duration: result.duration,
       author: result.uploader,
       thumbnail: result.thumbnails.at(0).url,
-      url: result.original_url,
+      url: result.webpage_url,
       platform: Platform.YOUTUBE
     };
   }
@@ -78,6 +79,7 @@ export class YoutubeService implements IMusicService {
     const limit = 1;
     const result = await youtubeDl(`ytsearch${limit}:${query}`, this.flags) as any;
     if (result.entries.length === 0) throw new Error();
+    
     const item = result.entries.at(0);
     return <Song>{
       title: item.title,
