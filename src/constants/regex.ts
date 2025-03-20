@@ -1,9 +1,9 @@
 export const youtubeVideoRegex = new RegExp(
-  /(?:youtube\.com\/(?:[^\\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\\/\s]{11})/,
+  /(?:youtube\.com\/(?:.*[?&]v=|.*\/|v\/|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
 );
 
 export const youtubePlaylistRegex = new RegExp(
-  /https:\/\/www\.youtube\.com\/.*\?.*\blist=.*/,
+  /(?:youtube\.com)\/.*\?.*?\blist=([a-zA-Z0-9_-]+)/,
 );
 
 export const soundCloudTrackRegex = new RegExp(
