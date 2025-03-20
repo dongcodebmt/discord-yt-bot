@@ -18,13 +18,4 @@ export class MusicService implements IMusicService {
   public async getAsync(query: string): Promise<Playlist | Song> {
     return this.plugin.getAsync(query);
   }
-  public async searchAsync(query: string): Promise<Song> {
-    return this.plugin.searchAsync(query);
-  }
-  public async getPlaylistAsync(url: string): Promise<Playlist> {
-    return this.plugin.getPlaylistAsync(url);
-  }
-  public async getSongAsync(url: string): Promise<Song> {
-    return this.plugin.getSongAsync(url);
-  }
 }

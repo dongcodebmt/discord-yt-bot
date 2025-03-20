@@ -19,7 +19,7 @@ export class SoundCloudService implements IMusicService {
     return this.searchAsync(query);
   }
 
-  public async getPlaylistAsync(url: string): Promise<Playlist> {
+  private async getPlaylistAsync(url: string): Promise<Playlist> {
     const result = await this.plugin.resolve(url, {}) as any;
     if (!result.songs) {
       throw new Error();
@@ -42,7 +42,7 @@ export class SoundCloudService implements IMusicService {
     };
   }
 
-  public async getSongAsync(url: string): Promise<Song> {
+  private async getSongAsync(url: string): Promise<Song> {
     const result = await this.plugin.resolve(url, {}) as any;
     return <Song>{
       title: result.name,
@@ -54,7 +54,7 @@ export class SoundCloudService implements IMusicService {
     };
   }
 
-  public async searchAsync(query: string): Promise<Song> {
+  private async searchAsync(query: string): Promise<Song> {
     const result = await this.plugin.search(query, SearchType.Track, 1 );
     if (result.length === 0) throw new Error();
     const item = result.at(0) as any;

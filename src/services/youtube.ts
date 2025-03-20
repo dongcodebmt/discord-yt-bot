@@ -27,17 +27,19 @@ export class YoutubeService implements IMusicService {
   }
 
   public async getAsync(query: string): Promise<Playlist | Song> {
-    if (this.isPlaylist(query)) {
-      return this.getPlaylistAsync(query);
+    const playlistId = this.getPlaylistId(query);
+    if (playlistId) {
+      return this.getPlaylistAsync(playlistId);
     }
-    if (this.isVideo(query)) {
-      return this.getSongAsync(query);
+    const videoId = this.getVideoId(query);
+    if (videoId) {
+      return this.getSongAsync(videoId);
     }
     return this.searchAsync(query);
   }
 
-  public async getPlaylistAsync(url: string): Promise<Playlist> {
-    const result = await youtubeDl(url, this.flags) as any;
+  private async getPlaylistAsync(id: string): Promise<Playlist> {
+    const result = await youtubeDl(id, this.flags) as any;
     
     if (result.entries.length === 0) throw new Error();
     const songs: Song[] = result.entries.map((item: any) => (
@@ -59,8 +61,8 @@ export class YoutubeService implements IMusicService {
     };
   }
 
-  public async getSongAsync(url: string): Promise<Song> {
-    const result = await youtubeDl(url, this.flags) as any;
+  private async getSongAsync(id: string): Promise<Song> {
+    const result = await youtubeDl(id, this.flags) as any;
     if (!result) throw new Error();
     return <Song>{
       title: result.title,
@@ -72,7 +74,7 @@ export class YoutubeService implements IMusicService {
     };
   }
 
-  public async searchAsync(query: string): Promise<Song> {
+  private async searchAsync(query: string): Promise<Song> {
     const limit = 1;
     const result = await youtubeDl(`ytsearch${limit}:${query}`, this.flags) as any;
     if (result.entries.length === 0) throw new Error();
@@ -87,13 +89,13 @@ export class YoutubeService implements IMusicService {
     };
   }
 
-  private isPlaylist(url: string): boolean {
-    const paths = url.match(youtubePlaylistRegex);
-    return paths != null;
+  private getPlaylistId(url: string): string | undefined {
+    const match = url.match(youtubePlaylistRegex);
+    return match ? match[1] : undefined;
   }
 
-  private isVideo(url: string): boolean {
-    const paths = url.match(youtubeVideoRegex);
-    return paths != null;
+  private getVideoId(url: string): string | undefined {
+    const match = url.match(youtubeVideoRegex);
+    return match ? match[1] : undefined;
   }
 }
