@@ -12,7 +12,6 @@ import { remove } from '@/commands/collections/remove';
 import { resume } from '@/commands/collections/resume';
 import { shuffle } from '@/commands/collections/shuffle';
 import { skip } from '@/commands/collections/skip';
-import { Platform } from '@/types';
 
 export const run = (client: Client): void => {
   client.on('interactionCreate', async (interaction) => {
@@ -21,9 +20,6 @@ export const run = (client: Client): void => {
       switch (interaction.commandName) {
         case play.name:
           play.execute(interaction, client);
-          break;
-        case Platform.SOUNDCLOUD.toLocaleLowerCase():
-          play.execute(interaction, client, Platform.SOUNDCLOUD);
           break;
         case skip.name:
           skip.execute(interaction);

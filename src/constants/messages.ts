@@ -29,8 +29,9 @@ const multi = {
     help: '💡 Trợ giúp',
     ping: '📶 Ping',
     shuffled: '🔀 Trộn bài',
-    playDescription: 'Phát một bài hoặc playlist trên Youtube',
-    inputPlayDescription: 'URL hoặc từ khóa để tìm kiếm bài hát hoặc playlist trên Youtube',
+    playDescription: 'Phát một bài hoặc playlist',
+    inputPlayDescription: 'URL hoặc từ khóa để tìm kiếm bài hát hoặc playlist',
+    platformPlayDescription: 'Chọn nền tảng (mặc định: youtube)',
     skipDescription: 'Bỏ qua bài hiện tại để đến bài tiếp theo trong hàng đợi',
     queueDescription: 'Xem danh sách bài hát trong hàng đợi',
     pauseDescription: 'Dừng bài đang phát hiện tại',
@@ -44,10 +45,8 @@ const multi = {
     pingDescription: 'Xem ping đến server',
     leaveDescription: 'Thoát kênh thoại',
     helpDescription: 'Xem trợ giúp cho bot này',
-    soundcloudDescription: 'Phát một bài hoặc playlist trên SoundCloud',
-    inputSoundcloudDescription: 'URL hoặc từ khóa để tìm kiếm bài hát hoặc playlist trên SoundCloud',
-    badWordMessage: '🤫 Đừng chat từ cấm nhé bạn tôi!',
-    inviteBlockMessage: '🤨 Đừng spam nhé bạn tôi!'
+    badWordMessage: '🤫 Đừng chat từ cấm nhé bạn tôi ơi!',
+    inviteBlockMessage: '🤨 Đừng spam nhé bạn tôi ơi!'
   },
   en: {
     error: '❌ Error!',
@@ -77,8 +76,9 @@ const multi = {
     help: '💡 Help',
     ping: '📶 Ping',
     shuffled: '🔀 Shuffled',
-    playDescription: 'Plays a song or playlist on Youtube',
-    inputPlayDescription: 'The url or keyword to search songs or playlist on Youtube',
+    playDescription: 'Plays a song or playlist',
+    inputPlayDescription: 'The url or keyword to search songs or playlist',
+    platformPlayDescription: 'Choose the platform (default: youtube)',
     skipDescription: 'Skip to the next song in the queue',
     queueDescription: 'See the music queue',
     pauseDescription: 'Pauses the song that is currently playing',
@@ -92,8 +92,6 @@ const multi = {
     pingDescription: 'See the ping to server',
     leaveDescription: 'Leave the voice channel',
     helpDescription: 'See the help for this bot',
-    soundcloudDescription: 'Plays a song or playlist on SoundCloud',
-    inputSoundcloudDescription: 'The url or keyword to search songs or playlist on SoundCloud',
     badWordMessage: '🤫 Don\'t swear!',
     inviteBlockMessage: '🤨 Don\'t spam!'
   }

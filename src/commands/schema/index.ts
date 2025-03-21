@@ -1,6 +1,7 @@
 import { ApplicationCommandData } from 'discord.js';
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 import messages from '@/constants/messages';
+import { Platform } from '@/types';
 
 export const schema: ApplicationCommandData[] = [
   {
@@ -12,6 +13,16 @@ export const schema: ApplicationCommandData[] = [
         type: ApplicationCommandOptionType.String,
         description: messages.inputPlayDescription,
         required: true,
+      },
+      {
+        name: 'platform',
+        type: ApplicationCommandOptionType.String,
+        description: messages.platformPlayDescription,
+        required: false,
+        choices: [
+          { name: Platform.YOUTUBE, value: Platform.YOUTUBE.toLocaleLowerCase() },
+          { name: Platform.SOUNDCLOUD, value: Platform.SOUNDCLOUD.toLocaleLowerCase() },
+        ],
       },
     ],
   },
@@ -74,17 +85,5 @@ export const schema: ApplicationCommandData[] = [
   {
     name: 'help',
     description: messages.helpDescription,
-  },
-  {
-    name: 'soundcloud',
-    description: messages.soundcloudDescription,
-    options: [
-      {
-        name: 'input',
-        type: ApplicationCommandOptionType.String,
-        description: messages.inputSoundcloudDescription,
-        required: true,
-      },
-    ],
-  },
+  }
 ];

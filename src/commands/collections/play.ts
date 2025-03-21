@@ -13,7 +13,7 @@ import { createPlayMessage } from '@/commands/messages/playMessage';
 
 export const play = {
   name: 'play',
-  execute: async (interaction: CommandInteraction, client: Client, platform: Platform = Platform.YOUTUBE): Promise<void> => {
+  execute: async (interaction: CommandInteraction, client: Client): Promise<void> => {
     await interaction.deferReply();
     let server = servers.get(interaction.guildId as string);
     if (!server) {
@@ -53,39 +53,43 @@ export const play = {
     }
 
     try {
-      const service: MusicService = new MusicService(platform);
       const input = interaction.options.get('input')!.value! as string;
+      const inputPlatform = interaction.options.get('platform')?.value as string | undefined;
+      const normalizedPlatform = inputPlatform?.toUpperCase() as keyof typeof Platform;
+      const platform = Platform[normalizedPlatform] ?? Platform.YOUTUBE;
+      const service: MusicService = new MusicService(platform);
+
       const result = await service.getAsync(input);
       const requester = interaction.member?.user.username ?? '';
+
       let payload: any = { platform, requester };
-      if ((result as Playlist).songs) {
-        const playlist = (result as Playlist);
-        await server.addSongs(playlist.songs.map(item => <QueueItem>{ song: item, requester }));
-        payload = {
-          ...payload,
-          title: playlist.title,
+      let items: QueueItem[];
+      
+      if ('songs' in result) {
+        const { title, author, thumbnail, songs } = result as Playlist;
+        items = songs.map(song => ({ song, requester }));
+        Object.assign(payload, {
+          title,
           url: input,
-          author: playlist.author,
-          thumbnail: playlist.thumbnail,
-          length: playlist.songs.length,
+          author,
+          thumbnail,
+          length: songs.length,
           type: ItemType.PLAYLIST
-        };
+        });
       } else {
-        const song = (result as Song);
-        await server.addSongs([{
-          song: result as Song,
-          requester: interaction.member?.user.username ?? ''
-        }]);
-        payload = {
-          ...payload,
-          title: song.title,
-          url: song.url,
-          author: song.author,
-          thumbnail: song.thumbnail,
-          length: song.duration,
-          type: ItemType.VIDEO,
-        };
+        const { title, url, author, thumbnail, duration, platform } = result as Song;
+        items = [{ song: result as Song, requester: interaction.member?.user.username ?? '' }];
+        Object.assign(payload, {
+          title,
+          url,
+          author,
+          thumbnail,
+          length: duration,
+          type: platform === Platform.YOUTUBE ? ItemType.VIDEO : ItemType.TRACK
+        });
       }
+      
+      await server.addSongs(items);
       interaction.followUp({
         embeds: [
           createPlayMessage(payload),
