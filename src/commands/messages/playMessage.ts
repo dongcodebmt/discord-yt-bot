@@ -19,11 +19,17 @@ export const createPlayMessage = (payload: {
   platform: Platform;
   requester: string;
 }): EmbedBuilder => {
-  const author: APIEmbedField = {
-    name: messages.author,
-    value: payload.author,
-    inline: true,
-  };
+  const fields: APIEmbedField[] = [];
+  
+  if (payload.author) {
+    const author: APIEmbedField = {
+      name: messages.author,
+      value: payload.author,
+      inline: true,
+    };
+    fields.push(author);
+  }
+  
   const length: APIEmbedField = {
     name: payload.type === ItemType.PLAYLIST ? messages.length : messages.duration,
     value: payload.type === ItemType.PLAYLIST ? payload.length.toString() : formatSeconds(payload.length),
@@ -34,7 +40,9 @@ export const createPlayMessage = (payload: {
     value: payload.type,
     inline: true,
   };
-  const fields: APIEmbedField[] = [author, length, type];
+  fields.push(length);
+  fields.push(type);
+
   return new EmbedBuilder()
     .setColor(MESSAGE_EMBED_COLOR)
     .setTitle(payload.title)
