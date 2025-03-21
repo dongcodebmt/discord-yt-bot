@@ -1,12 +1,21 @@
-import { SoundCloudPlugin, SearchType } from '@distube/soundcloud';
 import { soundCloudPlaylistRegex, soundCloudTrackRegex } from '@/constants/regex';
-import { Playlist, Platform, Song, ItemType, IMusicService } from '@/types';
+import { Playlist, Platform, Song, IMusicService } from '@/types';
+import { youtubeDl, Flags } from 'youtube-dl-exec';
 
 export class SoundCloudService implements IMusicService {
-  private plugin: SoundCloudPlugin = new SoundCloudPlugin();
+  private flags: Flags = {
+    dumpSingleJson: true,
+    noWarnings: true,
+    noCheckCertificates: true,
+    skipDownload: true,
+    quiet: true,
+    ignoreErrors: true,
+    addHeader: ['Referer:soundcloud.com', 'user-agent:googlebot']
+  }
 
   public async getStreamURLAsync(url: string): Promise<string> {
-    return this.plugin.getStreamURL({ url } as any);
+    const result = await youtubeDl(url, this.flags) as any;
+    return result.url;
   }
 
   public async getAsync(query: string): Promise<Playlist | Song> {
@@ -20,50 +29,55 @@ export class SoundCloudService implements IMusicService {
   }
 
   private async getPlaylistAsync(url: string): Promise<Playlist> {
-    const result = await this.plugin.resolve(url, {}) as any;
-    if (!result.songs) {
-      throw new Error();
-    }
-    const songs: Song[] = result.songs.map((item: any) => (
-      <Song> {
-        title: item.name,
+    const result = await youtubeDl(url, this.flags) as any;
+
+    if (result.entries.length === 0) throw new Error();
+
+    const songs: Song[] = result.entries.map((item: any) => (
+      <Song>{
+        title: item.title,
         duration: item.duration,
-        author: item.uploader.name,
+        author: item.uploader,
         thumbnail: item.thumbnail,
-        url: item.url, 
-        platform: Platform.SOUNDCLOUD
+        url: item.webpage_url,
+        platform: Platform.YOUTUBE
       }
     ));
-    return <Playlist> {
-      title: result.name,
-      thumbnail: result.thumbnail,
-      author: ItemType.PLAYLIST,
+
+    return <Playlist>{
+      title: result.title,
+      thumbnail: songs.at(0)?.thumbnail,
+      author: result.uploader,
       songs
     };
   }
 
   private async getSongAsync(url: string): Promise<Song> {
-    const result = await this.plugin.resolve(url, {}) as any;
+    const result = await youtubeDl(url, this.flags) as any;
+    if (!result) throw new Error();
+
     return <Song>{
-      title: result.name,
+      title: result.title,
       duration: result.duration,
-      author: result.uploader.name,
+      author: result.uploader,
       thumbnail: result.thumbnail,
-      url: result.url,
+      url: result.webpage_url,
       platform: Platform.SOUNDCLOUD
     };
   }
 
   private async searchAsync(query: string): Promise<Song> {
-    const result = await this.plugin.search(query, SearchType.Track, 1 );
-    if (result.length === 0) throw new Error();
-    const item = result.at(0) as any;
-    return <Song> {
-      title: item.name,
+    const limit = 1;
+    const result = await youtubeDl(`scsearch:${limit}:${query}`, this.flags) as any;
+    if (result.entries.length === 0) throw new Error();
+    
+    const item = result.entries.at(0);
+    return <Song>{
+      title: item.title,
       duration: item.duration,
-      author: item.uploader.name,
+      author: item.uploader,
       thumbnail: item.thumbnail,
-      url: item.url,
+      url: item.webpage_url,
       platform: Platform.SOUNDCLOUD
     };
   }
