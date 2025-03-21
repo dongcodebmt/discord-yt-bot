@@ -8,10 +8,12 @@ export class YoutubeService implements IMusicService {
     dumpSingleJson: true,
     noWarnings: true,
     noCheckCertificates: true,
-    preferFreeFormats: true,
     skipDownload: true,
     flatPlaylist: true,
-    simulate: true,
+    youtubeSkipDashManifest: true,
+    geoBypass: true,
+    quiet: true,
+    ignoreErrors: true,
     addHeader: ['referer:youtube.com', 'user-agent:googlebot']
   }
 

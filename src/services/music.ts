@@ -4,18 +4,26 @@ import { SoundCloudService } from '@/services/soundcloud';
 
 export class MusicService implements IMusicService {
   private plugin: IMusicService;
+
   constructor(platform: Platform = Platform.YOUTUBE) {
-    if (platform === Platform.SOUNDCLOUD) {
-      this.plugin = new SoundCloudService();
-    } else {
-      this.plugin = new YoutubeService();
-    }
+    this.plugin = this.createPlugin(platform);
   }
 
-  public async getStreamURLAsync(url: string): Promise<string> {
+  public getStreamURLAsync(url: string): Promise<string> {
     return this.plugin.getStreamURLAsync(url);
   }
-  public async getAsync(query: string): Promise<Playlist | Song> {
+
+  public getAsync(query: string): Promise<Playlist | Song> {
     return this.plugin.getAsync(query);
+  }
+
+  private createPlugin(platform: Platform): IMusicService {
+    switch (platform) {
+      case Platform.SOUNDCLOUD:
+        return new SoundCloudService();
+      case Platform.YOUTUBE:
+      default:
+        return new YoutubeService();
+    }
   }
 }
