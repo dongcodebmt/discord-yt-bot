@@ -40,7 +40,7 @@ export class SoundCloudService implements IMusicService {
         author: item.uploader,
         thumbnail: item.thumbnail,
         url: item.webpage_url,
-        platform: Platform.YOUTUBE
+        platform: Platform.SOUNDCLOUD
       }
     ));
 
