@@ -3,7 +3,7 @@ import { ChildProcess, spawn, exec } from 'child_process';
 import { StreamType, createAudioResource, AudioResource } from '@discordjs/voice';
 const pathToFfmpeg = require('ffmpeg-static');
 
-export class DiscordStream {
+export class FfmpegService {
   private ffmpegPath: string = 'ffmpeg';
   private args: string[] = [];
   private process?: ChildProcess;
@@ -42,7 +42,7 @@ export class DiscordStream {
     this.audioResource = createAudioResource(this.stream, { inputType: StreamType.Raw, inlineVolume: false });
   }
 
-  spawn() {
+  spawn() { 
     this.process = spawn(this.ffmpegPath, this.args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: false,

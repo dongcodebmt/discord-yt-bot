@@ -3,15 +3,15 @@ import { QueueItem } from '@/types';
 import {
   AudioPlayer,
   AudioPlayerStatus,
-  createAudioPlayer,
-  entersState,
   VoiceConnection,
   VoiceConnectionDisconnectReason,
-  VoiceConnectionStatus
+  VoiceConnectionStatus,
+  createAudioPlayer,
+  entersState
 } from '@discordjs/voice';
 import { Client, ActivityType, ActivityOptions } from 'discord.js';
 import { shuffle } from '@/utils';
-import { MusicService, DiscordStream } from '@/services';
+import { MusicService, FfmpegService } from '@/services';
 import { BOT_DEFAULT_ACTIVITY } from '@/constants/config';
 
 export class Server {
@@ -159,9 +159,9 @@ export class Server {
         return;
       }
       this.playing = this.queue.shift() as QueueItem;
-      const service: MusicService = new MusicService(this.playing.song.platform);
-      const streamUrl = await service.getStreamURLAsync(this.playing.song.url);
-      const stream: any = new DiscordStream(streamUrl);
+      const service: MusicService = new MusicService();
+      const streamUrl = await service.getStreamURLAsync(this.playing.song);
+      const stream: any = new FfmpegService(streamUrl);
       this.audioPlayer.play(stream.audioResource);
       stream.spawn();
     } catch (e) {
