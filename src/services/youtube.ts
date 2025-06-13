@@ -30,9 +30,9 @@ export class YoutubeService implements IMusicService {
   private streamCache: CacheSerivce = new CacheSerivce('yt:stream', 5.5 * 60);
 
   private async createInnerTubeAsync(): Promise<Innertube> {
-    const cookie = await fs.readFile(YOUTUBE_COOKIES_PATH, 'utf8');
-    const { poTokenResult, visitorData } = await this.generateTokenAsync();
     if (!this.innertube) {
+      const cookie = await fs.readFile(YOUTUBE_COOKIES_PATH, 'utf8');
+      const { poTokenResult, visitorData } = await this.generateTokenAsync();
       this.innertube = await Innertube.create({
         cookie,
         po_token: poTokenResult.poToken,

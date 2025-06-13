@@ -1,6 +1,6 @@
 import messages from '@/constants/messages';
 import { servers } from '@/servers';
-import { CommandInteraction, TextChannel, ChatInputCommandInteraction } from 'discord.js';
+import { CommandInteraction, ChatInputCommandInteraction } from 'discord.js';
 import { Pagination } from 'pagination.djs';
 import { createQueueMessages } from '@/commands/messages/queueMessage';
 
@@ -21,11 +21,7 @@ export const queue = {
     const embedMessages = createQueueMessages(server.queue);
     await interaction.editReply(messages.yourQueue);
 
-    if (
-      interaction &&
-      interaction.channel &&
-      interaction.channel instanceof TextChannel
-    ) {
+    if (interaction && interaction.channel) {
       const pagination = new Pagination(interaction as ChatInputCommandInteraction);
 
       pagination.setEmbeds(embedMessages);

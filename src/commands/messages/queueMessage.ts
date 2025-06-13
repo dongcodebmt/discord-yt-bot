@@ -11,9 +11,7 @@ const generatePageMessage = (items: IQueueItem[], start: number) => {
     title: messages.yourQueue,
     fields: items.map((item, index) => ({
       name: `${start + 1 + index}. ${item.song.title} | ${item.song.author}`,
-      value: `${formatSeconds(item.song.duration)} | ${item.song.platform} | ${
-        messages.addedToQueue
-      } ${item.requester}`,
+      value: `${formatSeconds(item.song.duration)} | ${item.song.platform} | ${messages.addedToQueue} ${item.requester}`,
     })),
     color: MESSAGE_EMBED_COLOR,
   });
@@ -27,10 +25,7 @@ export const createQueueMessages = (queue: IQueueItem[]): Embed[] => {
   } else {
     const embedMessages = [];
     for (let i = 0; i < queue.length; i += MAX_SONGS_PER_PAGE) {
-      const items = generatePageMessage(
-        queue.slice(i, i + MAX_SONGS_PER_PAGE),
-        i,
-      );
+      const items = generatePageMessage(queue.slice(i, i + MAX_SONGS_PER_PAGE), i,);
       embedMessages.push(items);
     }
     return embedMessages;
