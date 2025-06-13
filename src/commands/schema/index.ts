@@ -1,7 +1,7 @@
 import { ApplicationCommandData } from 'discord.js';
 import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 import messages from '@/constants/messages';
-import { Platform } from '@/types';
+import { Platform } from '@/enums';
 
 export const schema: ApplicationCommandData[] = [
   {

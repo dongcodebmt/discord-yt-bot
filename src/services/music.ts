@@ -4,7 +4,8 @@ import {
   soundCloudPlaylistRegex,
   soundCloudTrackRegex
 } from '@/constants/regex'
-import { Playlist, Song, IMusicService, Platform, MediaType } from '@/types';
+import { IPlaylist, ISong, IMusicService } from '@/types';
+import { Platform, MediaType } from '@/enums';
 import { YoutubeService } from '@/services/youtube';
 import { SoundCloudService } from '@/services/soundcloud';
 
@@ -15,12 +16,12 @@ export class MusicService {
     this.platformSelected = platform;
   }
 
-  public getStreamURLAsync(song: Song): Promise<string> {
+  public getStreamURLAsync(song: ISong): Promise<string> {
     const plugin = this.createPluginByPlatform(song.platform);
-    return plugin.getStreamURLAsync(song.url);
+    return plugin.getStreamURLAsync(song);
   }
 
-  public getAsync(query: string): Promise<Playlist | Song> {
+  public getAsync(query: string): Promise<IPlaylist | ISong> {
     const type = this.detectMediaType(query);
     const plugin = this.createPluginByMediaType(type);
 

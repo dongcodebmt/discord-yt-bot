@@ -1,8 +1,8 @@
-import { Playlist, Song } from "@/types";
+import { IPlaylist, ISong } from "@/types";
 
 export interface IMusicService {
-  getStreamURLAsync: (url: string) => Promise<string>;
-  getPlaylistAsync: (url: string) => Promise<Playlist>;
-  getSongAsync: (url: string) => Promise<Song>;
-  searchAsync: (query: string) => Promise<Song>;
+  getStreamURLAsync: (song: ISong) => Promise<string>;
+  getPlaylistAsync: (url: string) => Promise<IPlaylist>;
+  getSongAsync: (url: string) => Promise<ISong>;
+  searchAsync: (query: string) => Promise<ISong>;
 }

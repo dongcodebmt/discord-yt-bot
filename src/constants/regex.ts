@@ -11,7 +11,7 @@ export const soundCloudTrackRegex = new RegExp(
 );
 
 export const soundCloudPlaylistRegex = new RegExp(
-  /^https?:\/\/(soundcloud\.com|snd\.sc)\/([^?])*\/sets\/(.*)$/,
+  /^https?:\/\/(soundcloud\.com|snd\.sc)\/([^?]*)\/sets\/(.*)$/,
 );
 
 export const discordInviteShortRegex = new RegExp(

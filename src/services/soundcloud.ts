@@ -1,80 +1,130 @@
-import { Playlist, Platform, IMusicService, Song } from '@/types';
-import { YoutubeDlService } from "@/services"
-import { Flags } from 'youtube-dl-exec';
+import { Platform } from '@/enums';
+import {
+  IMusicService,
+  IPlaylist,
+  IPlaylistCache,
+  ISong
+} from '@/types';
+import {
+  soundCloudPlaylistRegex,
+  soundCloudTrackRegex
+} from '@/constants/regex'
+import {
+  SOUNDCLOUD_CLIENT_ID,
+  SOUNDCLOUD_OAUTH_TOKEN
+} from '@/constants/config';
+import {
+  CacheSerivce,
+  RedisService
+} from "@/services"
+import { Soundcloud, SoundcloudTrack } from 'soundcloud.ts';
 
 export class SoundCloudService implements IMusicService {
-  private yt: YoutubeDlService;
+  private soundcloud: Soundcloud = new Soundcloud(SOUNDCLOUD_CLIENT_ID, SOUNDCLOUD_OAUTH_TOKEN);
+  private redis: RedisService = new RedisService();
+  private songCache: CacheSerivce = new CacheSerivce('sc:song', 24 * 60);
+  private playlistCache: CacheSerivce = new CacheSerivce('sc:playlist', 24 * 60);
+  private streamCache: CacheSerivce = new CacheSerivce('sc:stream', 30);
 
-  constructor() {
-    const flags: Flags = {
-      dumpSingleJson: true,
-      noWarnings: true,
-      noCheckCertificates: true,
-      skipDownload: true,
-      quiet: true,
-      ignoreErrors: true,
-      addHeader: ['Referer:soundcloud.com', 'user-agent:googlebot']
-    };
+  public async getStreamURLAsync(song: ISong): Promise<string> {
+    const cached = await this.redis.getAsync(this.streamCache.key(song.id));
+    if (cached) return cached as string;
 
-    this.yt = new YoutubeDlService(flags);
+    const streamUrl = await this.soundcloud.util.streamLink(song.url);
+    await this.redis.setAsync(this.streamCache.key(song.id), streamUrl, this.streamCache.ttl());
+    return streamUrl;
   }
 
-  public async getStreamURLAsync(url: string): Promise<string> {
-    const result = await this.yt.exec(url);
-    return result.url;
-  }
+  public async getPlaylistAsync(url: string): Promise<IPlaylist> {
+    const playlistId = this.getPlaylistId(url) || url;
+    const cached = await this.redis.getAsync(this.playlistCache.key(playlistId));
+    if (cached) return await this.getPlaylistFromCacheAsync(cached as IPlaylistCache);
 
-  public async getPlaylistAsync(url: string): Promise<Playlist> {
-    const result = await this.yt.exec(url);
+    const result = await this.soundcloud.playlists.getAlt(url);
+    if (result.tracks.length === 0) throw new Error('PLAYLIST_NOT_FOUND');
 
-    if (result.entries.length === 0) throw new Error('Empty playlist');
-
-    const songs: Song[] = result.entries.map((item: any) => (
-      <Song>{
+    const songs: ISong[] = result.tracks.map((item: SoundcloudTrack) => (
+      <ISong>{
+        id: this.getTrackId(item.permalink_url) ?? item.permalink_url,
         title: item.title,
-        duration: item.duration,
-        author: item.uploader,
-        thumbnail: item.thumbnail,
-        url: item.webpage_url,
+        duration: item.duration / 1000,
+        author: item.user.full_name,
+        thumbnail: item.artwork_url,
+        url: item.permalink_url,
         platform: Platform.SOUNDCLOUD
       }
     ));
 
-    return <Playlist>{
+    const playlist: IPlaylistCache = {
+      id: this.getPlaylistId(result.permalink_url) ?? result.permalink_url,
       title: result.title,
-      thumbnail: songs.at(0)?.thumbnail,
-      author: result.uploader,
-      songs
+      thumbnail: result.artwork_url ?? songs.at(0)?.thumbnail ?? '',
+      author: result.user.full_name,
+      ids: []
     };
+    for (const song of songs) {
+      playlist.ids.push(song.id);
+      await this.redis.setAsync(this.songCache.key(song.id), song, this.songCache.ttl());
+    }
+    await this.redis.setAsync(this.playlistCache.key(playlist.id), playlist, this.playlistCache.ttl());
+    return await this.getPlaylistFromCacheAsync(playlist);
   }
 
-  public async getSongAsync(url: string): Promise<Song> {
-    const result = await this.yt.exec(url);
-    if (!result) throw new Error('Not found');
+  public async getSongAsync(url: string): Promise<ISong> {
+    const trackId = this.getTrackId(url) || url;
+    const cached = await this.redis.getAsync(this.songCache.key(trackId));
+    if (cached) return cached as ISong;
 
-    return <Song>{
+    const result = await this.soundcloud.tracks.get(url);
+    if (!result) throw new Error('TRACK_NOT_FOUND');
+
+    const song: ISong = {
+      id: this.getTrackId(result.permalink_url) ?? result.permalink_url,
       title: result.title,
-      duration: result.duration,
-      author: result.uploader,
-      thumbnail: result.thumbnail,
-      url: result.webpage_url,
+      duration: result.duration / 1000,
+      author: result.user.full_name,
+      thumbnail: result.artwork_url,
+      url: result.permalink_url,
       platform: Platform.SOUNDCLOUD
     };
+    await this.redis.setAsync(this.songCache.key(song.id), song, this.songCache.ttl());
+    return song;
   }
 
-  public async searchAsync(query: string): Promise<Song> {
-    const limit = 1;
-    const result = await this.yt.exec(`scsearch:${limit}:${query}`);
-    if (result.entries.length === 0) throw new Error('No search results');
+  public async searchAsync(query: string): Promise<ISong> {
+    const result = await this.soundcloud.tracks.search({ q: query, limit: 1 });
+    if (result.collection.length === 0) throw new Error('NO_SEARCH_RESULT');
 
-    const item = result.entries.at(0);
-    return <Song>{
-      title: item.title,
-      duration: item.duration,
-      author: item.uploader,
-      thumbnail: item.thumbnail,
-      url: item.webpage_url,
+    const track = result.collection.at(0);
+    if (!track) throw new Error('NO_SEARCH_RESULT');
+
+    const song: ISong = {
+      id: this.getTrackId(track.permalink_url) ?? track.permalink_url,
+      title: track.title,
+      duration: track.duration,
+      author: track.user.full_name,
+      thumbnail: track.artwork_url,
+      url: track.permalink_url,
       platform: Platform.SOUNDCLOUD
     };
+    await this.redis.setAsync(this.songCache.key(song.id), song, this.songCache.ttl());
+    return song;
+  }
+
+  private async getPlaylistFromCacheAsync(cached: IPlaylistCache): Promise<IPlaylist> {
+    const playlist: IPlaylist = { ...cached, songs: [] };
+    for (const id of cached.ids) {
+      playlist.songs.push(await this.getSongAsync(id));
+    }
+    return playlist;
+  }
+
+  private getPlaylistId(url: string): string | null | undefined {
+    const match = url.match(soundCloudPlaylistRegex);
+    return match ? `${match[2]}/sets/${match[3]}` : null;
+  }
+
+  private getTrackId(url: string): string | null | undefined {
+    return url.match(soundCloudTrackRegex)?.[2];
   }
 }

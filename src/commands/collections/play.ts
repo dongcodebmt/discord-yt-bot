@@ -2,7 +2,8 @@ import messages from '@/constants/messages';
 import { Server } from '@/models/Server';
 import { servers } from '@/servers';
 import { MusicService } from '@/services';
-import { Platform, Playlist, QueueItem, Song, ItemType } from '@/types';
+import { IPlaylist, IQueueItem, ISong } from '@/types';
+import { Platform, ItemType } from '@/enums';
 import {
   entersState,
   joinVoiceChannel,
@@ -63,10 +64,10 @@ export const play = {
       const requester = interaction.member?.user.username ?? '';
 
       let payload: any = { platform, requester };
-      let items: QueueItem[];
+      let items: IQueueItem[];
       
       if ('songs' in result) {
-        const { title, author, thumbnail, songs } = result as Playlist;
+        const { title, author, thumbnail, songs } = result as IPlaylist;
         items = songs.map(song => ({ song, requester }));
         Object.assign(payload, {
           title,
@@ -77,8 +78,8 @@ export const play = {
           type: ItemType.PLAYLIST
         });
       } else {
-        const { title, url, author, thumbnail, duration, platform } = result as Song;
-        items = [{ song: result as Song, requester: interaction.member?.user.username ?? '' }];
+        const { title, url, author, thumbnail, duration, platform } = result as ISong;
+        items = [{ song: result as ISong, requester: interaction.member?.user.username ?? '' }];
         Object.assign(payload, {
           title,
           url,
@@ -96,6 +97,7 @@ export const play = {
         ],
       });
     } catch (error) {
+      console.error(error);
       await interaction.followUp(messages.failToPlay);
     }
   },

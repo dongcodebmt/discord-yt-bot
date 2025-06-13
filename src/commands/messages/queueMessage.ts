@@ -1,12 +1,12 @@
 import { MESSAGE_EMBED_COLOR } from '@/constants/config';
 import messages from '@/constants/messages';
-import { QueueItem } from '@/types';
+import { IQueueItem } from '@/types';
 import { formatSeconds } from '@/utils';
 import { EmbedBuilder, Embed } from 'discord.js';
 
 const MAX_SONGS_PER_PAGE = 10;
 
-const generatePageMessage = (items: QueueItem[], start: number) => {
+const generatePageMessage = (items: IQueueItem[], start: number) => {
   const embedMessage = new EmbedBuilder({
     title: messages.yourQueue,
     fields: items.map((item, index) => ({
@@ -20,7 +20,7 @@ const generatePageMessage = (items: QueueItem[], start: number) => {
   return embedMessage.data as Embed;
 };
 
-export const createQueueMessages = (queue: QueueItem[]): Embed[] => {
+export const createQueueMessages = (queue: IQueueItem[]): Embed[] => {
   if (queue.length < MAX_SONGS_PER_PAGE) {
     const embedMessage = generatePageMessage(queue, 0);
     return [embedMessage];

@@ -40,6 +40,6 @@ client.once('disconnect', () => {
     messageEvent(client);
     run(client);
   } catch (e: any) {
-    console.log('Error:', e.stack);
+    console.error('Error:', e.stack);
   }
 })();

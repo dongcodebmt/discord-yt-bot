@@ -1,5 +1,5 @@
 import { servers } from '@/servers';
-import { QueueItem } from '@/types';
+import { IQueueItem } from '@/types';
 import {
   AudioPlayer,
   AudioPlayerStatus,
@@ -16,8 +16,8 @@ import { BOT_DEFAULT_ACTIVITY } from '@/constants/config';
 
 export class Server {
   public guildId: string;
-  public playing?: QueueItem;
-  public queue: QueueItem[];
+  public playing?: IQueueItem;
+  public queue: IQueueItem[];
   public readonly voiceConnection: VoiceConnection;
   public readonly audioPlayer: AudioPlayer;
   private client: Client;
@@ -104,7 +104,7 @@ export class Server {
     voiceConnection.subscribe(this.audioPlayer);
   }
 
-  public async addSongs(queueItems: QueueItem[]): Promise<void> {
+  public async addSongs(queueItems: IQueueItem[]): Promise<void> {
     this.queue = this.queue.concat(queueItems);
     if (!this.playing) {
       await this.play();
@@ -133,7 +133,7 @@ export class Server {
     this.audioPlayer.unpause();
   }
 
-  public async jump(position: number): Promise<QueueItem> {
+  public async jump(position: number): Promise<IQueueItem> {
     const target = this.queue[position - 1];
     this.queue = this.queue
       .splice(0, position - 1)
@@ -143,7 +143,7 @@ export class Server {
     return target;
   }
 
-  public remove(position: number): QueueItem {
+  public remove(position: number): IQueueItem {
     return this.queue.splice(position - 1, 1)[0];
   }
 
@@ -158,7 +158,7 @@ export class Server {
         this.audioPlayer.stop();
         return;
       }
-      this.playing = this.queue.shift() as QueueItem;
+      this.playing = this.queue.shift() as IQueueItem;
       const service: MusicService = new MusicService();
       const streamUrl = await service.getStreamURLAsync(this.playing.song);
       const stream: any = new FfmpegService(streamUrl);
