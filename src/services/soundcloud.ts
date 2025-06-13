@@ -31,6 +31,7 @@ export class SoundCloudService implements IMusicService {
     if (cached) return cached as string;
 
     const streamUrl = await this.soundcloud.util.streamLink(song.url);
+    if (!streamUrl) throw new Error(`Unable to get stream url: ${song.id}`);
     await this.redis.setAsync(this.streamCache.key(song.id), streamUrl, this.streamCache.ttl());
     return streamUrl;
   }
@@ -41,7 +42,7 @@ export class SoundCloudService implements IMusicService {
     if (cached) return await this.getPlaylistFromCacheAsync(cached as IPlaylistCache);
 
     const result = await this.soundcloud.playlists.getAlt(url);
-    if (result.tracks.length === 0) throw new Error('PLAYLIST_NOT_FOUND');
+    if (result.tracks.length === 0) throw new Error(`${playlistId} playlist not found`);
 
     const songs: ISong[] = result.tracks.map((item: SoundcloudTrack) => (
       <ISong>{
@@ -76,7 +77,7 @@ export class SoundCloudService implements IMusicService {
     if (cached) return cached as ISong;
 
     const result = await this.soundcloud.tracks.get(url);
-    if (!result) throw new Error('TRACK_NOT_FOUND');
+    if (!result) throw new Error(`${trackId} track not found`);
 
     const song: ISong = {
       id: this.getTrackId(result.permalink_url) ?? result.permalink_url,
@@ -93,10 +94,10 @@ export class SoundCloudService implements IMusicService {
 
   public async searchAsync(query: string): Promise<ISong> {
     const result = await this.soundcloud.tracks.search({ q: query, limit: 1 });
-    if (result.collection.length === 0) throw new Error('NO_SEARCH_RESULT');
+    if (result.collection.length === 0) throw new Error(`No search results for: ${query}`);
 
     const track = result.collection.at(0);
-    if (!track) throw new Error('NO_SEARCH_RESULT');
+    if (!track) throw new Error(`No search results for: ${query}`);
 
     const song: ISong = {
       id: this.getTrackId(track.permalink_url) ?? track.permalink_url,

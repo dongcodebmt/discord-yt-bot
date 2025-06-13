@@ -17,47 +17,47 @@ import {
   CacheSerivce,
   RedisService
 } from "@/services"
-import { Innertube } from 'youtubei.js';
-import { YoutubeDlService } from "@/services"
-import { Flags } from 'youtube-dl-exec';
+import { Innertube, UniversalCache } from 'youtubei.js';
+import { promises as fs } from 'fs';
+import { JSDOM } from "jsdom";
+import { BG, BgConfig } from "bgutils-js";
 
 export class YoutubeService implements IMusicService {
-  private ytdl: YoutubeDlService;
+  private innertube: Innertube | null | undefined;
   private redis: RedisService = new RedisService();
   private songCache: CacheSerivce = new CacheSerivce('yt:song', 24 * 60);
   private playlistCache: CacheSerivce = new CacheSerivce('yt:playlist', 24 * 60);
   private streamCache: CacheSerivce = new CacheSerivce('yt:stream', 5.5 * 60);
 
-  constructor() {
-    const flags: Flags = {
-      dumpSingleJson: true,
-      noWarnings: true,
-      noCheckCertificates: true,
-      skipDownload: true,
-      flatPlaylist: true,
-      youtubeSkipDashManifest: true,
-      geoBypass: true,
-      quiet: true,
-      ignoreErrors: true,
-      addHeader: ['referer:youtube.com', 'user-agent:googlebot'],
-      ...(YOUTUBE_COOKIES_PATH ? { cookies: YOUTUBE_COOKIES_PATH } : {})
-    };
-    this.ytdl = new YoutubeDlService(flags);
-  }
-
   private async createInnerTubeAsync(): Promise<Innertube> {
-    return await Innertube.create();
+    const cookie = await fs.readFile(YOUTUBE_COOKIES_PATH, 'utf8');
+    const { poTokenResult, visitorData } = await this.generateTokenAsync();
+    if (!this.innertube) {
+      this.innertube = await Innertube.create({
+        cookie,
+        po_token: poTokenResult.poToken,
+        visitor_data: visitorData,
+        cache: new UniversalCache(true),
+        generate_session_locally: true
+      });
+    }
+    return this.innertube;
   }
 
   public async getStreamURLAsync(song: ISong): Promise<string> {
     const cached = await this.redis.getAsync(this.streamCache.key(song.id));
     if (cached) return cached as string;
 
-    // TODO switch to Innertube
-    const result = await this.ytdl.exec(song.id, { format: 'bestaudio' }) as any;
-    const playbackUrl = result.url;
-    await this.redis.setAsync(this.streamCache.key(song.id), playbackUrl, this.streamCache.ttl());
-    return playbackUrl;
+    const innertube = await this.createInnerTubeAsync();
+    const streamData = await innertube.getStreamingData(song.id, {
+      format: 'mp4',
+      type: 'audio',
+      quality: 'best',
+      client: 'TV' 
+    });
+    if (!streamData.url) throw new Error(`Unable to get stream url: ${song.id}`);
+    await this.redis.setAsync(this.streamCache.key(song.id), streamData.url, this.streamCache.ttl());
+    return streamData.url!;
   }
 
   public async getPlaylistAsync(url: string): Promise<IPlaylist> {
@@ -67,7 +67,7 @@ export class YoutubeService implements IMusicService {
 
     const innertube = await this.createInnerTubeAsync();
     const response = await innertube.getPlaylist(playlistId);
-    if (!response) throw new Error('PLAYLIST_NOT_FOUND');
+    if (!response) throw new Error(`${playlistId} playlist not found`);
 
     const playlist: IPlaylistCache = {
       id: playlistId,
@@ -86,7 +86,7 @@ export class YoutubeService implements IMusicService {
         author: item.author.name,
         thumbnail: item.thumbnails.at(0).url,
         url: this.getUrlFromId(item.id),
-        platform: Platform.SOUNDCLOUD
+        platform: Platform.YOUTUBE
       }
     ));
 
@@ -105,8 +105,7 @@ export class YoutubeService implements IMusicService {
 
     const innertube = await this.createInnerTubeAsync();
     const response = await innertube.getBasicInfo(videoId);
-
-    if (!response) throw new Error('VIDEO_NOT_FOUND');
+    if (!response) throw new Error(`${videoId} video not found`);
 
     const song: ISong = {
       id: response.basic_info.id!,
@@ -115,7 +114,7 @@ export class YoutubeService implements IMusicService {
       author: response.basic_info.author!,
       thumbnail: response.basic_info.thumbnail?.at(0)?.url!,
       url: this.getUrlFromId(response.basic_info.id!),
-      platform: Platform.SOUNDCLOUD
+      platform: Platform.YOUTUBE
     };
     await this.redis.setAsync(this.songCache.key(song.id), song, this.songCache.ttl());
     return song;
@@ -124,10 +123,10 @@ export class YoutubeService implements IMusicService {
   public async searchAsync(query: string): Promise<ISong> {
     const innertube = await this.createInnerTubeAsync();
     const response = await innertube.search(query, { type: 'video' });
-    if (response.results.length === 0) throw new Error('NO_SEARCH_RESULTS');
+    if (response.results.length === 0) throw new Error(`No search results for: ${query}`);
 
     const video = response.results.at(0) as any;
-    if (!video) throw new Error('NO_SEARCH_RESULTS');
+    if (response.results.length === 0) throw new Error(`No search results for: ${query}`);
 
     const song: ISong = {
       id: video.video_id,
@@ -154,11 +153,55 @@ export class YoutubeService implements IMusicService {
     return `https://youtu.be/${id}`;
   }
 
-  private getPlaylistId(url: string): string | undefined {
+  private getPlaylistId(url: string): string | null | undefined {
     return url.match(youtubePlaylistRegex)?.[1];
   }
 
-  private getVideoId(url: string): string | undefined {
+  private getVideoId(url: string): string | null | undefined {
     return url.match(youtubeVideoRegex)?.[1];
+  }
+
+  private async generateTokenAsync(): Promise<any> {
+    // Create a barebones Innertube instance so we can get a visitor data string from YouTube.
+    const innertube = await Innertube.create({ retrieve_player: false });
+
+    const requestKey = 'O43z0dpjhgX20SCx4KAo';
+    const visitorData = innertube.session.context.client.visitorData;
+
+    if (!visitorData)
+      throw new Error('Could not get visitor data');
+
+    const dom = new JSDOM();
+
+    Object.assign(globalThis, {
+      window: dom.window,
+      document: dom.window.document
+    });
+
+    const bgConfig: BgConfig = {
+      fetch: (input: string | URL | globalThis.Request, init?: RequestInit) => fetch(input, init),
+      globalObj: globalThis,
+      identifier: visitorData,
+      requestKey
+    };
+
+    const bgChallenge = await BG.Challenge.create(bgConfig);
+
+    if (!bgChallenge)
+      throw new Error('Could not get challenge');
+
+    const interpreterJavascript = bgChallenge.interpreterJavascript.privateDoNotAccessOrElseSafeScriptWrappedValue;
+
+    if (interpreterJavascript) {
+      new Function(interpreterJavascript)();
+    } else throw new Error('Could not load VM');
+
+    const poTokenResult = await BG.PoToken.generate({
+      program: bgChallenge.program,
+      globalName: bgChallenge.globalName,
+      bgConfig
+    });
+
+    return { poTokenResult, visitorData };
   }
 }

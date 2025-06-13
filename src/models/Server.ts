@@ -21,6 +21,7 @@ export class Server {
   public readonly voiceConnection: VoiceConnection;
   public readonly audioPlayer: AudioPlayer;
   private client: Client;
+  private musicService: MusicService = new MusicService();
   private isReady = false;
 
   constructor(voiceConnection: VoiceConnection, guildId: string, client: Client) {
@@ -159,14 +160,17 @@ export class Server {
         return;
       }
       this.playing = this.queue.shift() as IQueueItem;
-      const service: MusicService = new MusicService();
-      const streamUrl = await service.getStreamURLAsync(this.playing.song);
+      const streamUrl = await this.musicService.getStreamURLAsync(this.playing.song);
       const stream: any = new FfmpegService(streamUrl);
       this.audioPlayer.play(stream.audioResource);
       stream.spawn();
     } catch (e) {
       this.play();
     }
+  }
+
+  public getMusicService(): MusicService {
+    return this.musicService;
   }
 
   private setActivity(opts: ActivityOptions = BOT_DEFAULT_ACTIVITY): void {

@@ -1,7 +1,6 @@
 import messages from '@/constants/messages';
 import { Server } from '@/models/Server';
 import { servers } from '@/servers';
-import { MusicService } from '@/services';
 import { IPlaylist, IQueueItem, ISong } from '@/types';
 import { Platform, ItemType } from '@/enums';
 import {
@@ -58,9 +57,8 @@ export const play = {
       const inputPlatform = interaction.options.get('platform')?.value as string | undefined;
       const normalizedPlatform = inputPlatform?.toUpperCase() as keyof typeof Platform;
       const platform = Platform[normalizedPlatform] ?? Platform.YOUTUBE;
-      const service: MusicService = new MusicService(platform);
 
-      const result = await service.getAsync(input);
+      const result = await server.getMusicService().getAsync(input, platform);
       const requester = interaction.member?.user.username ?? '';
 
       let payload: any = { platform, requester };

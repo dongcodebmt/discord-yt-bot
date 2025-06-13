@@ -10,20 +10,17 @@ import { YoutubeService } from '@/services/youtube';
 import { SoundCloudService } from '@/services/soundcloud';
 
 export class MusicService {
-  private platformSelected: Platform;
-
-  constructor(platform: Platform = Platform.YOUTUBE) {
-    this.platformSelected = platform;
-  }
+  private youtube: YoutubeService = new YoutubeService();
+  private soundcloud: SoundCloudService = new SoundCloudService();
 
   public getStreamURLAsync(song: ISong): Promise<string> {
-    const plugin = this.createPluginByPlatform(song.platform);
+    const plugin = this.getPluginByPlatform(song.platform);
     return plugin.getStreamURLAsync(song);
   }
 
-  public getAsync(query: string): Promise<IPlaylist | ISong> {
+  public getAsync(query: string, platform: Platform = Platform.YOUTUBE): Promise<IPlaylist | ISong> {
     const type = this.detectMediaType(query);
-    const plugin = this.createPluginByMediaType(type);
+    const plugin = this.getPluginByMediaType(type, platform);
 
     switch (type) {
       case MediaType.SoundCloudPlaylist:
@@ -38,27 +35,29 @@ export class MusicService {
     }
   }
 
-  private createPluginByPlatform(platform: Platform): IMusicService {
+  private getPluginByPlatform(platform: Platform): IMusicService {
     switch (platform) {
       case Platform.SOUNDCLOUD:
-        return new SoundCloudService();
+        return this.soundcloud;
       case Platform.YOUTUBE:
       default:
-        return new YoutubeService();
+        return this.youtube;
     }
   }
 
-  private createPluginByMediaType(type: MediaType): IMusicService {
+  private getPluginByMediaType(type: MediaType, platform: Platform = Platform.YOUTUBE): IMusicService {
     switch (type) {
       case MediaType.SoundCloudPlaylist:
       case MediaType.SoundCloudTrack:
-        return new SoundCloudService();
+        return this.soundcloud;
       case MediaType.YouTubePlaylist:
       case MediaType.YouTubeVideo:
-        return new YoutubeService();
+        return this.youtube;
       case MediaType.Unknown:
       default:
-        return this.platformSelected == Platform.SOUNDCLOUD ? new SoundCloudService() : new YoutubeService();
+        return platform == Platform.SOUNDCLOUD
+          ? this.soundcloud
+          : this.youtube;
     }
   }
 
