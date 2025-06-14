@@ -126,7 +126,7 @@ export class YoutubeService implements IMusicService {
     if (response.results.length === 0) throw new Error(`No search results for: ${query}`);
 
     const video = response.results.at(0) as any;
-    if (response.results.length === 0) throw new Error(`No search results for: ${query}`);
+    if (!video) throw new Error(`No search results for: ${query}`);
 
     const song: ISong = {
       id: video.video_id,
