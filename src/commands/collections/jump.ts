@@ -1,18 +1,18 @@
 import messages from '@/constants/messages';
 import { servers } from '@/servers';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 
 export const jump = {
   name: 'jump',
-  execute: async (interaction: CommandInteraction): Promise<void> => {
+  execute: async (interaction: ChatInputCommandInteraction): Promise<void> => {
     await interaction.deferReply();
     const server = servers.get(interaction.guildId as string);
     if (!server) {
       await interaction.followUp(messages.joinVoiceChannel);
       return;
     }
-    const input = interaction.options.get('position')!.value! as number;
-    if (input < 1 || input > server.queue.length || !Number.isInteger(input)) {
+    const input = interaction.options.getNumber('position');
+    if (input === null || input < 1 || input > server.queue.length || !Number.isInteger(input)) {
       await interaction.followUp(messages.invalidPosition);
       return;
     }

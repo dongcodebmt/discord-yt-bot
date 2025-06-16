@@ -1,12 +1,12 @@
 import messages from '@/constants/messages';
 import { servers } from '@/servers';
-import { CommandInteraction, ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { Pagination } from 'pagination.djs';
 import { createQueueMessages } from '@/commands/messages/queueMessage';
 
 export const queue = {
   name: 'queue',
-  execute: async (interaction: CommandInteraction): Promise<void> => {
+  execute: async (interaction: ChatInputCommandInteraction): Promise<void> => {
     await interaction.deferReply();
     const server = servers.get(interaction.guildId as string);
     if (!server) {

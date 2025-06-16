@@ -1,11 +1,11 @@
 import messages from '@/constants/messages';
-import { Client, CommandInteraction } from 'discord.js';
+import { Client, ChatInputCommandInteraction } from 'discord.js';
 
 export const ping = {
   name: 'ping',
   execute: async (
     client: Client,
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
   ): Promise<void> => {
     await interaction.deferReply();
     interaction.followUp(

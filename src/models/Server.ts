@@ -6,12 +6,13 @@ import {
   VoiceConnection,
   VoiceConnectionDisconnectReason,
   VoiceConnectionStatus,
+  createAudioResource,
   createAudioPlayer,
   entersState
 } from '@discordjs/voice';
 import { Client, ActivityType, ActivityOptions } from 'discord.js';
 import { shuffle } from '@/utils';
-import { MusicService, FfmpegService } from '@/services';
+import { MusicService } from '@/services';
 import { BOT_DEFAULT_ACTIVITY } from '@/constants/config';
 
 export class Server {
@@ -161,9 +162,8 @@ export class Server {
       }
       this.playing = this.queue.shift() as IQueueItem;
       const streamUrl = await this.musicService.getStreamURLAsync(this.playing.song);
-      const stream: any = new FfmpegService(streamUrl);
-      this.audioPlayer.play(stream.audioResource);
-      stream.spawn();
+      const audioResource = createAudioResource(streamUrl);
+      this.audioPlayer.play(audioResource);
     } catch (e) {
       this.play();
     }

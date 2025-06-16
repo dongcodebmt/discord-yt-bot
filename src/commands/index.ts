@@ -15,7 +15,8 @@ import { skip } from '@/commands/collections/skip';
 
 export const run = (client: Client): void => {
   client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isCommand() || !interaction.guildId) return;
+    if (!interaction.isChatInputCommand() || !interaction.guildId) return;
+    
     try {
       switch (interaction.commandName) {
         case play.name:

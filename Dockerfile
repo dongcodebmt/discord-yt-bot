@@ -1,5 +1,5 @@
 FROM node:alpine AS environment
-RUN apk add --no-cache ffmpeg python3
+RUN apk add --no-cache ffmpeg
 
 FROM environment AS build
 WORKDIR /app

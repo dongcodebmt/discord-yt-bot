@@ -1,10 +1,10 @@
 import messages from '@/constants/messages';
 import { servers } from '@/servers';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 
 export const shuffle = {
   name: 'shuffle',
-  execute: async (interaction: CommandInteraction): Promise<void> => {
+  execute: async (interaction: ChatInputCommandInteraction): Promise<void> => {
     await interaction.deferReply();
     const server = servers.get(interaction.guildId as string);
     if (!server) {

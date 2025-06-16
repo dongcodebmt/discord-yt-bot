@@ -8,12 +8,12 @@ import {
   joinVoiceChannel,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { CommandInteraction, GuildMember, Client } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember, Client } from 'discord.js';
 import { createPlayMessage } from '@/commands/messages/playMessage';
 
 export const play = {
   name: 'play',
-  execute: async (interaction: CommandInteraction, client: Client): Promise<void> => {
+  execute: async (interaction: ChatInputCommandInteraction, client: Client): Promise<void> => {
     await interaction.deferReply();
     let server = servers.get(interaction.guildId as string);
     if (!server) {
