@@ -1,26 +1,60 @@
 # DiscordYTBot
-Discord bot to play music
+
+A Discord bot for playing music from YouTube (and SoundCloud) in your server’s voice channels.
+
+## Features
+
+- Play music from YouTube and SoundCloud
+- Slash command support
+- Filter banned words and invitation spam
+- Dockerized for easy deployment
 
 ## Requirements
-- Docker
-- Docker Compose
 
-## Using
-- Create a discord app at [developer portal](https://discord.com/developers/applications?new_application=true)
-- Setup permissions
-  - Scopes: `bot`, `application.commands`
-  - Bot permissions: `Send Messages`, `Embed Links`, `Use Slash Commands`, `Connect`, `Speak`, `Manage Messages`
-- Clone this repo  
-- Create .env from example.env
-  - `BOT_TOKEN=<token>`
-  - `BOT_LANG=<en|vi>`
-- Build docker image and run
-```
-docker compose up -d --build
-```
-- Invite the bot to the server, then join a voice channel. Send /deploy to deploy the slash command for bot in the server
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- A Discord account with permission to create bots
 
-## Docs
-Send /help to view bot commands
+## Setup & Usage
 
-#### Credits to [MisaBot](https://github.com/misa198/misa-bot-discord), Discord.JS and more
+1. **Create a Discord Application**
+   - Go to the [Discord Developer Portal](https://discord.com/developers/applications?new_application=true)
+   - Create a new application and add a bot user
+   - Under "OAuth2 > URL Generator":
+     - Scopes: `bot`, `applications.commands`
+     - Bot Permissions: `Send Messages`, `Embed Links`, `Use Slash Commands`, `Connect`, `Speak`, `Manage Messages`
+
+2. **Clone this repository**
+   ```
+   git clone https://github.com/dongcodebmt/discord-yt-bot.git
+   cd discord-yt-bot
+   ```
+
+3. **Configure environment variables**
+   - Copy `.env.example` to `.env` and fill in your bot token and other required values
+
+4. **Add YouTube cookies**
+   - Use [Cookie-Editor](https://github.com/moustachauve/cookie-editor) to export your YouTube cookies and save them as `cookies.txt` in the project root
+
+5. **Build and run with Docker Compose**
+   ```
+   docker compose up -d --build
+   ```
+
+6. **Invite the bot to your server**
+   - Use the OAuth2 URL from the Developer Portal with the correct scopes and permissions
+
+7. **Deploy slash commands**
+   - Join a voice channel and send `/deploy` in your server to register slash commands
+
+## Documentation
+
+- Send `/help` in your server to view available bot commands
+- See `soundcloud.ts` and `youtubei.js` for implementation details
+
+## Credits
+
+- Based on [MisaBot](https://github.com/misa198/misa-bot-discord)
+- Uses [discord.js](https://discord.js.org/), [youtubei.js](https://ytjs.dev/), [soundcloud.ts](https://github.com/Moebits/soundcloud.ts)  and other open-source libraries
+
+---
