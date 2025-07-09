@@ -16,7 +16,8 @@ import {
 import {
   CacheSerivce,
   RedisService
-} from "@/services"
+} from '@/services'
+import messages from '@/constants/messages';
 import { Soundcloud, SoundcloudTrack } from 'soundcloud.ts';
 
 export class SoundCloudService implements IMusicService {
@@ -31,7 +32,7 @@ export class SoundCloudService implements IMusicService {
     if (cached) return cached as string;
 
     const streamUrl = await this.soundcloud.util.streamLink(song.url);
-    if (!streamUrl) throw new Error(`Unable to get stream url: ${song.id}`);
+    if (!streamUrl) throw new Error(messages.unableGetStreamUrl);
     await this.redis.setAsync(this.streamCache.key(song.id), streamUrl, this.streamCache.ttl());
     return streamUrl;
   }
@@ -42,7 +43,7 @@ export class SoundCloudService implements IMusicService {
     if (cached) return await this.getPlaylistFromCacheAsync(cached as IPlaylistCache);
 
     const result = await this.soundcloud.playlists.getAlt(url);
-    if (result.tracks.length === 0) throw new Error(`${playlistId} playlist not found`);
+    if (result.tracks.length === 0) throw new Error(messages.playlistNotFound);
 
     const songs: ISong[] = result.tracks.map((item: SoundcloudTrack) => (
       <ISong>{
@@ -77,7 +78,7 @@ export class SoundCloudService implements IMusicService {
     if (cached) return cached as ISong;
 
     const result = await this.soundcloud.tracks.get(url);
-    if (!result) throw new Error(`${trackId} track not found`);
+    if (!result) throw new Error(messages.songNotFound);
 
     const song: ISong = {
       id: this.getTrackId(result.permalink_url) ?? result.permalink_url,
@@ -94,10 +95,10 @@ export class SoundCloudService implements IMusicService {
 
   public async searchAsync(query: string): Promise<ISong> {
     const result = await this.soundcloud.tracks.search({ q: query, limit: 1 });
-    if (result.collection.length === 0) throw new Error(`No search results for: ${query}`);
+    if (result.collection.length === 0) throw new Error(`${messages.searchNotFound} ${query}`);
 
     const track = result.collection.at(0);
-    if (!track) throw new Error(`No search results for: ${query}`);
+    if (!track) throw new Error(`${messages.searchNotFound} ${query}`);
 
     const song: ISong = {
       id: this.getTrackId(track.permalink_url) ?? track.permalink_url,

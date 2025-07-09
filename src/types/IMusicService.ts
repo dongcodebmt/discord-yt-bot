@@ -1,4 +1,4 @@
-import { IPlaylist, ISong } from "@/types";
+import { IPlaylist, ISong } from '@/types';
 
 export interface IMusicService {
   getStreamURLAsync: (song: ISong) => Promise<string>;

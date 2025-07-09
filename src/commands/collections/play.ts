@@ -63,7 +63,7 @@ export const play = {
 
       let payload: any = { platform, requester };
       let items: IQueueItem[];
-      
+
       if ('songs' in result) {
         const { title, author, thumbnail, songs } = result as IPlaylist;
         items = songs.map(song => ({ song, requester }));
@@ -87,16 +87,17 @@ export const play = {
           type: platform === Platform.YOUTUBE ? ItemType.VIDEO : ItemType.TRACK
         });
       }
-      
+
       await server.addSongs(items);
       interaction.followUp({
         embeds: [
           createPlayMessage(payload),
         ],
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      await interaction.followUp(messages.failToPlay);
+      const message = error?.message || 'Unknown error';
+      await interaction.followUp(`${messages.failToPlay} ${message}`);
     }
   },
 };

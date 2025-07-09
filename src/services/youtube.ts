@@ -16,11 +16,12 @@ import { timeStringToSeconds } from '@/utils';
 import {
   CacheSerivce,
   RedisService
-} from "@/services"
+} from '@/services'
+import messages from '@/constants/messages';
 import { Innertube, UniversalCache } from 'youtubei.js';
 import { promises as fs } from 'fs';
-import { JSDOM } from "jsdom";
-import { BG, BgConfig } from "bgutils-js";
+import { JSDOM } from 'jsdom';
+import { BG, BgConfig } from 'bgutils-js';
 
 export class YoutubeService implements IMusicService {
   private innertube: Innertube | null | undefined;
@@ -55,7 +56,7 @@ export class YoutubeService implements IMusicService {
       quality: 'best',
       client: 'TV' 
     });
-    if (!streamData.url) throw new Error(`Unable to get stream url: ${song.id}`);
+    if (!streamData.url) throw new Error(messages.unableGetStreamUrl);
     await this.redis.setAsync(this.streamCache.key(song.id), streamData.url, this.streamCache.ttl());
     return streamData.url!;
   }
@@ -67,7 +68,7 @@ export class YoutubeService implements IMusicService {
 
     const innertube = await this.createInnerTubeAsync();
     const response = await innertube.getPlaylist(playlistId);
-    if (!response) throw new Error(`${playlistId} playlist not found`);
+    if (!response) throw new Error(messages.playlistNotFound);
 
     const playlist: IPlaylistCache = {
       id: playlistId,
@@ -105,7 +106,7 @@ export class YoutubeService implements IMusicService {
 
     const innertube = await this.createInnerTubeAsync();
     const response = await innertube.getBasicInfo(videoId);
-    if (!response) throw new Error(`${videoId} video not found`);
+    if (!response) throw new Error(messages.songNotFound);
 
     const song: ISong = {
       id: response.basic_info.id!,
@@ -123,10 +124,10 @@ export class YoutubeService implements IMusicService {
   public async searchAsync(query: string): Promise<ISong> {
     const innertube = await this.createInnerTubeAsync();
     const response = await innertube.search(query, { type: 'video' });
-    if (response.results.length === 0) throw new Error(`No search results for: ${query}`);
+    if (response.results.length === 0) throw new Error(`${messages.searchNotFound} ${query}`);
 
     const video = response.results.at(0) as any;
-    if (!video) throw new Error(`No search results for: ${query}`);
+    if (!video) throw new Error(`${messages.searchNotFound} ${query}`);
 
     const song: ISong = {
       id: video.video_id,

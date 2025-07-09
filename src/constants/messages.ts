@@ -3,10 +3,9 @@ import { BOT_LANG } from '@/constants/config';
 const multi = {
   vi: {
     error: '❌ Lỗi!',
-    cantFindAnyThing: "❌ Không tìm thấy bất cứ gì!",
     joinVoiceChannel: '🔊 Tham gia kênh thoại và thử lại!',
     failToJoinVoiceChannel: '❌ Tham gia kênh thoại thất bại!',
-    failToPlay: '❌ Có lỗi trong quá trình phát!',
+    failToPlay: '❌ Có lỗi trong quá trình phát:',
     addedToQueue: 'Thêm vào hàng đợi bởi',
     author: 'Kênh',
     duration: 'Thời lượng',
@@ -16,10 +15,8 @@ const multi = {
     noSongsInQueue: '👀 Không có bài hát trong hàng đợi!',
     skippedSong: '⏩ Qua bài!',
     notPlaying: '🔇 Đã dừng phát!',
-    alreadyPaused: '⏸  Đã dừng!',
     paused: '⏸  Dừng!',
     resumed: '▶ Tiếp tục!',
-    alreadyPlaying: '▶ Đã phát rồi!',
     leaved: '👋 Bye bye',
     nothing: '🤷‍♂️ Không có gì',
     yourQueue: '🎶 Hàng đợi của bạn',
@@ -46,14 +43,17 @@ const multi = {
     leaveDescription: 'Thoát kênh thoại',
     helpDescription: 'Xem trợ giúp cho bot này',
     badWordMessage: '🤫 Đừng chat từ cấm nhé bạn tôi ơi!',
-    inviteBlockMessage: '🤨 Đừng spam nhé bạn tôi ơi!'
+    inviteBlockMessage: '🤨 Đừng spam nhé bạn tôi ơi!',
+    playlistNotFound: 'Không tìm thấy danh phát này!',
+    unableGetStreamUrl: 'Không thể lấy liên kết phát!',
+    songNotFound: 'Không tìm thấy bài hát ngày!',
+    searchNotFound: 'Không có kết quả tìm kiếm cho từ khóa:'
   },
   en: {
     error: '❌ Error!',
-    cantFindAnyThing: "❌ Can't find anything!",
     joinVoiceChannel: '🔊 Join a voice channel and try again!',
     failToJoinVoiceChannel: '❌ Failed to join voice channel!',
-    failToPlay: '❌ Failed to play!',
+    failToPlay: '❌ Failed to play:',
     addedToQueue: 'Added to queue by',
     author: 'Author',
     duration: 'Duration',
@@ -63,10 +63,8 @@ const multi = {
     noSongsInQueue: '👀 No songs in queue!',
     skippedSong: '⏩ Skipped song!',
     notPlaying: '🔇 Not playing!',
-    alreadyPaused: '⏸ Already paused!',
     paused: '⏸ Paused!',
     resumed: '▶ Resumed!',
-    alreadyPlaying: '▶ Already playing!',
     leaved: '👋 Bye bye',
     nothing: '🤷‍♂️ Nothing',
     yourQueue: '🎶 Your queue',
@@ -93,7 +91,11 @@ const multi = {
     leaveDescription: 'Leave the voice channel',
     helpDescription: 'See the help for this bot',
     badWordMessage: '🤫 Don\'t swear!',
-    inviteBlockMessage: '🤨 Don\'t spam!'
+    inviteBlockMessage: '🤨 Don\'t spam!',
+    playlistNotFound: 'The playlist does not exist!',
+    unableGetStreamUrl: 'Unable to get stream url!',
+    songNotFound: 'This song does not exist!',
+    searchNotFound: 'No search results for:'
   }
 }
 

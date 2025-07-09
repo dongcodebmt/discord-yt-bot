@@ -23,4 +23,4 @@ docker compose up -d --build
 ## Docs
 Send /help to view bot commands
 
-#### Credits to [MisaBot](https://github.com/misa198/misa-bot-discord), Discord.JS, DisTube and more
+#### Credits to [MisaBot](https://github.com/misa198/misa-bot-discord), Discord.JS and more
