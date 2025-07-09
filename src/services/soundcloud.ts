@@ -103,7 +103,7 @@ export class SoundCloudService implements IMusicService {
     const song: ISong = {
       id: this.getTrackId(track.permalink_url) ?? track.permalink_url,
       title: track.title,
-      duration: track.duration,
+      duration: track.duration / 1000,
       author: track.user.full_name,
       thumbnail: track.artwork_url,
       url: track.permalink_url,
