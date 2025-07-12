@@ -54,11 +54,11 @@ export class YoutubeService implements IMusicService {
       format: 'mp4',
       type: 'audio',
       quality: 'best',
-      client: 'TV' 
+      client: 'TV'
     });
-    if (!streamData.url) throw new Error(messages.unableGetStreamUrl);
+    if (!streamData || !streamData.url) throw new Error(messages.unableGetStreamUrl);
     await this.redis.setAsync(this.streamCache.key(song.id), streamData.url, this.streamCache.ttl());
-    return streamData.url!;
+    return streamData.url;
   }
 
   public async getPlaylistAsync(url: string): Promise<IPlaylist> {
@@ -67,7 +67,7 @@ export class YoutubeService implements IMusicService {
     if (cached) return await this.getPlaylistFromCacheAsync(cached as IPlaylistCache);
 
     const innertube = await this.createInnerTubeAsync();
-    const response = await innertube.getPlaylist(playlistId);
+    let response = await innertube.getPlaylist(playlistId);
     if (!response) throw new Error(messages.playlistNotFound);
 
     const playlist: IPlaylistCache = {
@@ -77,24 +77,31 @@ export class YoutubeService implements IMusicService {
       author: response.info.author.name!,
       ids: []
     };
+    let continuation = false;
 
-    // TODO: response.getContinuation(), response.getContinuationData ???
-    const songs: ISong[] = response.items.map((item: any) => (
-      <ISong>{
-        id: item.id,
-        title: item.title.text,
-        duration: item.duration.seconds,
-        author: item.author.name,
-        thumbnail: item.thumbnails.at(0).url,
-        url: this.getUrlFromId(item.id),
-        platform: Platform.YOUTUBE
+    do {
+      const songs: ISong[] = response.items.map((item: any) => (
+        <ISong>{
+          id: item.id,
+          title: item.title.text,
+          duration: item.duration.seconds,
+          author: item.author.name,
+          thumbnail: item.thumbnails.at(0).url,
+          url: this.getUrlFromId(item.id),
+          platform: Platform.YOUTUBE
+        }
+      ));
+      for (const song of songs) {
+        playlist.ids.push(song.id);
+        await this.redis.setAsync(this.songCache.key(song.id), song, this.songCache.ttl());
       }
-    ));
 
-    for (const song of songs) {
-      playlist.ids.push(song.id);
-      await this.redis.setAsync(this.songCache.key(song.id), song, this.songCache.ttl());
-    }
+      continuation = response.has_continuation;
+      if (continuation) {
+        response = await response.getContinuation();
+      }
+    } while (continuation);
+
     await this.redis.setAsync(this.playlistCache.key(playlist.id), playlist, this.playlistCache.ttl());
     return await this.getPlaylistFromCacheAsync(playlist);
   }
