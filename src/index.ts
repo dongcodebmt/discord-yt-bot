@@ -2,9 +2,10 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { generateDependencyReport } from '@discordjs/voice';
 import { config } from 'dotenv';
 config();
-import { BOT_TOKEN, BOT_DEFAULT_ACTIVITY } from '@/constants/config';
+import { BOT_TOKEN } from '@/constants/config';
 import { run } from '@/commands';
 import { messageEvent } from '@/messages';
+import { startActivityRotation } from '@/models/ActivityRotation';
 
 if (process.env.NODE_ENV === 'production') {
   // DO SOMETHING
@@ -23,7 +24,7 @@ client.on('ready', () => {
   console.log(generateDependencyReport());
   console.log('🏃‍♂️ Bot is online! 💨');
 
-  client.user?.setActivity(BOT_DEFAULT_ACTIVITY);
+  startActivityRotation(client);
 });
 
 client.once('reconnecting', () => {

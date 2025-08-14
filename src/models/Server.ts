@@ -9,10 +9,8 @@ import {
   createAudioPlayer,
   entersState
 } from '@discordjs/voice';
-import { Client, ActivityType, ActivityOptions } from 'discord.js';
 import { shuffle } from '@/utils';
 import { MusicService, StreamService } from '@/services';
-import { BOT_DEFAULT_ACTIVITY } from '@/constants/config';
 
 export class Server {
   public guildId: string;
@@ -20,17 +18,15 @@ export class Server {
   public queue: IQueueItem[];
   public readonly voiceConnection: VoiceConnection;
   public readonly audioPlayer: AudioPlayer;
-  private client: Client;
   private musicService: MusicService = new MusicService();
   private isReady = false;
 
-  constructor(voiceConnection: VoiceConnection, guildId: string, client: Client) {
+  constructor(voiceConnection: VoiceConnection, guildId: string) {
     this.voiceConnection = voiceConnection;
     this.audioPlayer = createAudioPlayer();
     this.queue = [];
     this.playing = undefined;
     this.guildId = guildId;
-    this.client = client;
 
     this.voiceConnection.on('stateChange', async (_, newState) => {
       if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -92,8 +88,6 @@ export class Server {
 
     // Configure audio player
     this.audioPlayer.on('stateChange', async (oldState, newState) => {
-      this.setActivity(newState.status === AudioPlayerStatus.Playing ? this.getCurrentActivity() : undefined);
-      
       if (
         newState.status === AudioPlayerStatus.Idle &&
         oldState.status !== AudioPlayerStatus.Idle
@@ -103,6 +97,10 @@ export class Server {
     });
 
     voiceConnection.subscribe(this.audioPlayer);
+  }
+
+  public getMusicService(): MusicService {
+    return this.musicService;
   }
 
   public async addSongs(queueItems: IQueueItem[]): Promise<void> {
@@ -166,24 +164,6 @@ export class Server {
     } catch (e) {
       console.error(e);
       this.play();
-    }
-  }
-
-  public getMusicService(): MusicService {
-    return this.musicService;
-  }
-
-  private setActivity(opts: ActivityOptions = BOT_DEFAULT_ACTIVITY): void {
-    this.client.user?.setActivity(opts);
-  }
-
-  private getCurrentActivity(): ActivityOptions {
-    if (!this.playing) {
-      return BOT_DEFAULT_ACTIVITY;
-    }
-    return {
-      name: `${this.playing.song.title} | ${this.playing.song.author}`,
-      type: ActivityType.Playing
     }
   }
 }

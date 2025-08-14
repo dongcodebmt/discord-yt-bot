@@ -1,4 +1,4 @@
-import { Colors, ActivityType, ActivityOptions } from 'discord.js';
+import { Colors } from 'discord.js';
 import { Platform } from '@/enums';
 import fs from 'fs';
 import * as path from 'path';
@@ -27,7 +27,3 @@ export const BOT_NAME = 'DongDev Bot';
 export const BOT_LOGO = 'https://www.dongdev.com/static/img/favicon.png';
 export const BAD_WORDS = fs.existsSync('badwords.json') ? JSON.parse(fs.readFileSync(path.join(process.cwd(), 'badwords.json'), 'utf-8')) : [];
 export const YOUTUBE_COOKIES_PATH = path.join(process.cwd(), 'cookies.txt');
-export const BOT_DEFAULT_ACTIVITY: ActivityOptions = {
-  name: `music | ${CMD_PREFLIX}help`,
-  type: ActivityType.Playing
-};

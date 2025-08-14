@@ -1,4 +1,4 @@
-import { BOT_LANG } from '@/constants/config';
+import { BOT_LANG, CMD_PREFLIX } from '@/constants/config';
 
 const multi = {
   vi: {
@@ -47,7 +47,21 @@ const multi = {
     playlistNotFound: 'Không tìm thấy danh phát này!',
     unableGetStreamUrl: 'Không thể lấy liên kết phát!',
     songNotFound: 'Không tìm thấy bài hát ngày!',
-    searchNotFound: 'Không có kết quả tìm kiếm cho từ khóa:'
+    searchNotFound: 'Không có kết quả tìm kiếm cho từ khóa:',
+    activityHelp: `💡 Gõ ${CMD_PREFLIX}help để xem hướng dẫn`,
+    activityServerCount: (c: number) => `🎵 Đang phục vụ ${c} server`,
+    activityTotalListeners: (c: number) => `🎶 ${c} người đang nghe`,
+    activityMorning: '🌅 Buổi sáng!',
+    activityAfternoon: '🌇 Buổi chiều!',
+    activityEvening: '🌙 Buổi tối!',
+    activitySpring: '🌸 Mùa xuân!',
+    activitySummer: '☀️ Mùa hè!',
+    activityAutumn: '🍂 Mùa thu!',
+    activityWinter: '❄️ Mùa đông!',
+    activityValentine: '💖 Chúc mừng ngày Valentine!',
+    activityHalloween: '🎃 Quẩy Halloween thôi!',
+    activityChristmas: '🎄 Giáng sinh ấm áp!',
+    activityNewYear: '🧧 Chúc mừng năm mới!'
   },
   en: {
     error: '❌ Error!',
@@ -95,7 +109,21 @@ const multi = {
     playlistNotFound: 'The playlist does not exist!',
     unableGetStreamUrl: 'Unable to get stream url!',
     songNotFound: 'This song does not exist!',
-    searchNotFound: 'No search results for:'
+    searchNotFound: 'No search results for:',
+    activityHelp: `💡 Type  ${CMD_PREFLIX}help for help`,
+    activityServerCount: (c: number) => `🎵 Serving ${c} servers`,
+    activityTotalListeners: (c: number) => `🎶 ${c} people are listening`,
+    activityMorning: '🌅 Morning!',
+    activityAfternoon: '🌇 Afternoon!',
+    activityEvening: '🌙 Evening!',
+    activitySpring: '🌸 Spring!',
+    activitySummer: '☀️ Summer!',
+    activityAutumn: '🍂 Autumn!',
+    activityWinter: '❄️ Winter!',
+    activityValentine: `💖 Happy Valentine's Day!`,
+    activityHalloween: '🎃 Halloween Party!',
+    activityChristmas: '🎄 Warm Christmas!',
+    activityNewYear: '🧧 Happy New Year!'
   }
 }
 
