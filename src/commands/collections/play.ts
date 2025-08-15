@@ -1,5 +1,5 @@
 import messages from '@/constants/messages';
-import { Server } from '@/models/Server';
+import { Server } from '@/services';
 import { servers } from '@/servers';
 import { IPlaylist, IQueueItem, ISong } from '@/types';
 import { Platform, ItemType } from '@/enums';

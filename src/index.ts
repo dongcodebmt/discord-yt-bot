@@ -5,7 +5,7 @@ config();
 import { BOT_TOKEN } from '@/constants/config';
 import { run } from '@/commands';
 import { messageEvent } from '@/messages';
-import { startActivityRotation } from '@/models/ActivityRotation';
+import { ActivitySerivce } from '@/services';
 
 if (process.env.NODE_ENV === 'production') {
   // DO SOMETHING
@@ -24,7 +24,8 @@ client.on('ready', () => {
   console.log(generateDependencyReport());
   console.log('🏃‍♂️ Bot is online! 💨');
 
-  startActivityRotation(client);
+  const activityService = new ActivitySerivce(client);
+  activityService.startRotation();
 });
 
 client.once('reconnecting', () => {
