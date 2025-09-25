@@ -20,7 +20,7 @@ const client = new Client({
   ]
 });
 
-client.on('ready', () => {
+client.on('clientReady', () => {
   console.log(generateDependencyReport());
   console.log('🏃‍♂️ Bot is online! 💨');
 
