@@ -39,7 +39,8 @@ export class YoutubeService implements IMusicService {
         po_token: poTokenResult.poToken,
         visitor_data: visitorData,
         cache: new UniversalCache(true),
-        generate_session_locally: true
+        generate_session_locally: true,
+        player_id: '0004de42'
       });
     }
     return this.innertube;
