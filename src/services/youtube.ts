@@ -18,7 +18,12 @@ import {
   RedisService
 } from '@/services'
 import messages from '@/constants/messages';
-import { Innertube, UniversalCache } from 'youtubei.js';
+import {
+  Innertube,
+  UniversalCache,
+  Platform as InnertubePlatform,
+  Types
+} from 'youtubei.js';
 import { promises as fs } from 'fs';
 import { JSDOM } from 'jsdom';
 import { BG, BgConfig } from 'bgutils-js';
@@ -34,13 +39,25 @@ export class YoutubeService implements IMusicService {
     if (!this.innertube) {
       const cookie = await fs.readFile(YOUTUBE_COOKIES_PATH, 'utf8');
       const { poTokenResult, visitorData } = await this.generateTokenAsync();
+
+      InnertubePlatform.shim.eval = async (data: Types.BuildScriptResult, env: Record<string, Types.VMPrimative>) => {
+        const properties = [];
+        if (env.n) {
+          properties.push(`n: exportedVars.nFunction("${env.n}")`)
+        }
+        if (env.sig) {
+          properties.push(`sig: exportedVars.sigFunction("${env.sig}")`)
+        }
+        const code = `${data.output}\nreturn { ${properties.join(', ')} }`;
+        return new Function(code)();
+      };
+
       this.innertube = await Innertube.create({
         cookie,
         po_token: poTokenResult.poToken,
         visitor_data: visitorData,
         cache: new UniversalCache(true),
-        generate_session_locally: true,
-        player_id: '0004de42'
+        generate_session_locally: true
       });
     }
     return this.innertube;
