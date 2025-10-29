@@ -18,21 +18,26 @@ export class MusicService {
     return plugin.getStreamURLAsync(song);
   }
 
-  public getAsync(query: string, platform: Platform = Platform.YOUTUBE): Promise<IPlaylist | ISong> {
-    const type = this.detectMediaType(query);
-    const plugin = this.getPluginByMediaType(type, platform);
+  public async getAsync(query: string, platform: Platform = Platform.YOUTUBE): Promise<IPlaylist | ISong> {
+    const types = this.detectMediaTypes(query);
+    const plugin = this.getPluginByMediaType(types, platform);
 
-    switch (type) {
-      case MediaType.SoundCloudPlaylist:
-      case MediaType.YouTubePlaylist:
-        return plugin.getPlaylistAsync(query);
-      case MediaType.SoundCloudTrack:
-      case MediaType.YouTubeVideo:
-        return plugin.getSongAsync(query);
-      case MediaType.Unknown:
-      default:
-        return plugin.searchAsync(query);
+    // try to get as playlist first
+    if (this.hasType(types, [MediaType.SoundCloudPlaylist, MediaType.YouTubePlaylist])) {
+      try {
+        return await plugin.getPlaylistAsync(query);
+      } catch (e) {
+        // maybe it's a private playlist link, try to get as a song
+        if (this.hasType(types, [MediaType.SoundCloudTrack, MediaType.YouTubeVideo])) {
+          return await plugin.getSongAsync(query);
+        }
+        throw e;
+      }
     }
+    if (this.hasType(types, [MediaType.SoundCloudTrack, MediaType.YouTubeVideo])) {
+      return await plugin.getSongAsync(query);
+    }
+    return await plugin.searchAsync(query);
   }
 
   private getPluginByPlatform(platform: Platform): IMusicService {
@@ -45,32 +50,39 @@ export class MusicService {
     }
   }
 
-  private getPluginByMediaType(type: MediaType, platform: Platform = Platform.YOUTUBE): IMusicService {
-    switch (type) {
-      case MediaType.SoundCloudPlaylist:
-      case MediaType.SoundCloudTrack:
-        return this.soundcloud;
-      case MediaType.YouTubePlaylist:
-      case MediaType.YouTubeVideo:
-        return this.youtube;
-      case MediaType.Unknown:
-      default:
-        return platform == Platform.SOUNDCLOUD
-          ? this.soundcloud
-          : this.youtube;
+  private getPluginByMediaType(types: MediaType[], platform: Platform = Platform.YOUTUBE): IMusicService {
+    if (this.hasType(types, [MediaType.SoundCloudPlaylist, MediaType.SoundCloudTrack])) {
+      return this.soundcloud;
     }
+    if (this.hasType(types, [MediaType.YouTubePlaylist, MediaType.YouTubeVideo])) {
+      return this.youtube;
+    }
+    return platform == Platform.SOUNDCLOUD ? this.soundcloud : this.youtube;
   }
 
-  private detectMediaType(url: string): MediaType {
+  private detectMediaTypes(url: string): MediaType[] {
+    const result: MediaType[] = [];
     if (youtubePlaylistRegex.test(url)) {
-      return MediaType.YouTubePlaylist;
-    } else if (youtubeVideoRegex.test(url)) {
-      return MediaType.YouTubeVideo;
-    } else if (soundCloudPlaylistRegex.test(url)) {
-      return MediaType.SoundCloudPlaylist;
-    } else if (soundCloudTrackRegex.test(url)) {
-      return MediaType.SoundCloudTrack;
+      result.push(MediaType.YouTubePlaylist);
     }
-    return MediaType.Unknown;
+    if (youtubeVideoRegex.test(url)) {
+      result.push(MediaType.YouTubeVideo);
+    }
+    if (soundCloudPlaylistRegex.test(url)) {
+      result.push(MediaType.SoundCloudPlaylist);
+    }
+    if (soundCloudTrackRegex.test(url)) {
+      result.push(MediaType.SoundCloudTrack);
+    }
+    return result;
+  }
+
+  private hasType(type: MediaType[], targets: MediaType[]): boolean {
+    for (const t of targets) {
+      if (type.indexOf(t) > -1) {
+        return true;
+      }
+    }
+    return false;
   }
 }
