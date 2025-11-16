@@ -25,5 +25,4 @@ export const PLATFORM = {
 };
 export const BOT_NAME = 'DongDev Bot';
 export const BOT_LOGO = 'https://www.dongdev.com/static/img/favicon.png';
-export const BAD_WORDS = fs.existsSync('badwords.json') ? JSON.parse(fs.readFileSync(path.join(process.cwd(), 'badwords.json'), 'utf-8')) : [];
 export const YOUTUBE_COOKIES_PATH = path.join(process.cwd(), 'cookies.txt');

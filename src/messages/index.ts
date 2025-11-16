@@ -1,7 +1,6 @@
 import { Client, Message } from 'discord.js';
 import { deploy } from '@/commands/collections/deploy';
 import { CMD_PREFLIX } from '@/constants/config';
-import { messageFilter } from '@/messages/message-filter';
 import { guildInviteFilter } from './guild-invite-filter';
 
 export const messageEvent = (client: Client): void => {
@@ -18,7 +17,6 @@ export const messageEvent = (client: Client): void => {
     }
     if (message.author.id !== message.author.id) {
       guildInviteFilter(client, message);
-      messageFilter(message);
     }
   });
 };
