@@ -10,7 +10,7 @@ services:
       retries: 5
 
   discord-yt-bot:
-    image: ghcr.io/dongcodebmt/discord-yt-bot:latest
+    image: ghcr.io/dongdevcom/discord-yt-bot:latest
     container_name: discord-yt-bot
     build:
       context: .

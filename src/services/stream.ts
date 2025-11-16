@@ -12,8 +12,7 @@ export class StreamService {
     '-analyzeduration', '0',
     '-ar', '48000',
     '-ac', '2',
-    '-c:a', 'libopus',
-    '-f', 'webm'
+    '-f', 's16le'
   ];
   // Increase the buffer size to fix sudden stops in playback
   // I don't have any idea to fix this issue
@@ -23,7 +22,7 @@ export class StreamService {
     const args = ['-i', url, ...this.args];
     this.ffmpeg = new prism.FFmpeg({ args });
     const stream = this.ffmpeg.pipe(new PassThrough({ highWaterMark: this.bufferSize }));
-    this.audioResource = createAudioResource(stream, { inputType: StreamType.WebmOpus });
+    this.audioResource = createAudioResource(stream, { inputType: StreamType.Raw });
   }
 
   kill() {
