@@ -10,7 +10,7 @@ import {
   entersState
 } from '@discordjs/voice';
 import { shuffle } from '@/utils';
-import { MusicService, StreamService } from '@/services';
+import { MusicService } from '@/services';
 
 export class Server {
   public guildId: string;
@@ -158,9 +158,8 @@ export class Server {
         return;
       }
       this.playing = this.queue.shift() as IQueueItem;
-      const streamUrl = await this.musicService.getStreamURLAsync(this.playing.song);
-      const stream: any = new StreamService(streamUrl);
-      this.audioPlayer.play(stream.audioResource);
+      const audioResource = await this.musicService.createAudioResource(this.playing.song);
+      this.audioPlayer.play(audioResource);
     } catch (e) {
       console.error(e);
       this.play();

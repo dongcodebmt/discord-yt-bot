@@ -18,11 +18,11 @@
     "discord-api-types": "^0.38.33",
     "discord.js": "^14.24.2",
     "dotenv": "^17.2.3",
+    "googlevideo": "^4.0.4",
     "ioredis": "^5.8.2",
     "jsdom": "^27.2.0",
     "opusscript": "^0.0.8",
     "pagination.djs": "^4.0.18",
-    "prism-media": "^1.3.5",
     "sodium-native": "^5.0.10",
     "soundcloud.ts": "^0.7.0",
     "youtubei.js": "^16.0.1"

@@ -19,22 +19,17 @@ import {
 } from '@/services'
 import messages from '@/constants/messages';
 import { Soundcloud, SoundcloudTrack } from 'soundcloud.ts';
+import { createAudioResource, AudioResource, StreamType } from '@discordjs/voice';
 
 export class SoundCloudService implements IMusicService {
   private soundcloud: Soundcloud = new Soundcloud(SOUNDCLOUD_CLIENT_ID, SOUNDCLOUD_OAUTH_TOKEN);
   private redis: RedisService = new RedisService();
   private songCache: CacheSerivce = new CacheSerivce('sc:song', 24 * 60);
   private playlistCache: CacheSerivce = new CacheSerivce('sc:playlist', 24 * 60);
-  private streamCache: CacheSerivce = new CacheSerivce('sc:stream', 30);
 
-  public async getStreamURLAsync(song: ISong): Promise<string> {
-    const cached = await this.redis.getAsync(this.streamCache.key(song.id));
-    if (cached) return cached as string;
-
-    const streamUrl = await this.soundcloud.util.streamLink(song.url);
-    if (!streamUrl) throw new Error(messages.unableGetStreamUrl);
-    await this.redis.setAsync(this.streamCache.key(song.id), streamUrl, this.streamCache.ttl());
-    return streamUrl;
+  public async createAudioResource(song: ISong): Promise<AudioResource> {
+    const stream = await this.soundcloud.util.streamTrack(song.url);
+    return createAudioResource(stream, { inputType: StreamType.Arbitrary });
   }
 
   public async getPlaylistAsync(url: string): Promise<IPlaylist> {

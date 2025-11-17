@@ -24,4 +24,4 @@ export const PLATFORM = {
 };
 export const BOT_NAME = 'DongDev Bot';
 export const BOT_LOGO = 'https://dongdev.com/images/favicon.png';
-export const YOUTUBE_COOKIES_PATH = path.join(process.cwd(), 'cookies.txt');
+export const YOUTUBE_COOKIE_PATH = path.join(process.cwd(), 'cookie.txt');

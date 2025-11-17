@@ -1,3 +1,15 @@
+import { Readable } from 'node:stream';
+import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
+import {
+  Innertube,
+  UniversalCache,
+  Platform as InnertubePlatform,
+  Types
+} from 'youtubei.js';
+import type { SabrPlaybackOptions } from 'googlevideo/sabr-stream';
+import { EnabledTrackTypes } from 'googlevideo/utils';
+import { createAudioResource, AudioResource, StreamType } from '@discordjs/voice';
+
 import { Platform } from '@/enums';
 import {
   IMusicService,
@@ -5,40 +17,26 @@ import {
   IPlaylistCache,
   ISong
 } from '@/types';
-import {
-  youtubePlaylistRegex,
-  youtubeVideoRegex
-} from '@/constants/regex'
-import {
-  YOUTUBE_COOKIES_PATH
-} from '@/constants/config';
-import { timeStringToSeconds } from '@/utils';
-import {
-  CacheSerivce,
-  RedisService
-} from '@/services'
+import { youtubePlaylistRegex, youtubeVideoRegex } from '@/constants/regex'
+import { CacheSerivce, RedisService } from '@/services'
 import messages from '@/constants/messages';
 import {
-  Innertube,
-  UniversalCache,
-  Platform as InnertubePlatform,
-  Types
-} from 'youtubei.js';
-import { promises as fs } from 'fs';
-import { JSDOM } from 'jsdom';
-import { BG, BgConfig } from 'bgutils-js';
+  timeStringToSeconds,
+  getCookie,
+  detectAudioFormat,
+  createSabrStream
+} from '@/utils';
+
 
 export class YoutubeService implements IMusicService {
   private innertube: Innertube | null | undefined;
   private redis: RedisService = new RedisService();
   private songCache: CacheSerivce = new CacheSerivce('yt:song', 24 * 60);
   private playlistCache: CacheSerivce = new CacheSerivce('yt:playlist', 24 * 60);
-  private streamCache: CacheSerivce = new CacheSerivce('yt:stream', 5.5 * 60);
 
   private async createInnerTubeAsync(): Promise<Innertube> {
     if (!this.innertube) {
-      const cookie = await fs.readFile(YOUTUBE_COOKIES_PATH, 'utf8');
-      const { poTokenResult, visitorData } = await this.generateTokenAsync();
+      const cookie = await getCookie();
 
       InnertubePlatform.shim.eval = async (data: Types.BuildScriptResult, env: Record<string, Types.VMPrimative>) => {
         const properties = [];
@@ -54,8 +52,6 @@ export class YoutubeService implements IMusicService {
 
       this.innertube = await Innertube.create({
         cookie,
-        po_token: poTokenResult.poToken,
-        visitor_data: visitorData,
         cache: new UniversalCache(true),
         generate_session_locally: true
       });
@@ -63,20 +59,20 @@ export class YoutubeService implements IMusicService {
     return this.innertube;
   }
 
-  public async getStreamURLAsync(song: ISong): Promise<string> {
-    const cached = await this.redis.getAsync(this.streamCache.key(song.id));
-    if (cached) return cached as string;
+  public async createAudioResource(song: ISong): Promise<AudioResource> {
+    const options: SabrPlaybackOptions = {
+      preferWebM: true,
+      preferOpus: true,
+      audioQuality: 'AUDIO_QUALITY_MEDIUM',
+      enabledTrackTypes: EnabledTrackTypes.AUDIO_ONLY
+    };
 
-    const innertube = await this.createInnerTubeAsync();
-    const streamData = await innertube.getStreamingData(song.id, {
-      format: 'mp4',
-      type: 'audio',
-      quality: 'best',
-      client: 'TV'
-    });
-    if (!streamData || !streamData.url) throw new Error(messages.unableGetStreamUrl);
-    await this.redis.setAsync(this.streamCache.key(song.id), streamData.url, this.streamCache.ttl());
-    return streamData.url;
+    const { streamResults } = await createSabrStream(song.id, options);
+    const { audioStream, selectedFormats } = streamResults;
+
+    const nodeReadable = Readable.fromWeb(audioStream as NodeReadableStream);
+    const inputType = detectAudioFormat(selectedFormats?.audioFormat?.mimeType);
+    return createAudioResource(nodeReadable, { inputType });
   }
 
   public async getPlaylistAsync(url: string): Promise<IPlaylist> {
@@ -185,49 +181,5 @@ export class YoutubeService implements IMusicService {
 
   private getVideoId(url: string): string | null | undefined {
     return url.match(youtubeVideoRegex)?.[1];
-  }
-
-  private async generateTokenAsync(): Promise<any> {
-    // Create a barebones Innertube instance so we can get a visitor data string from YouTube.
-    const innertube = await Innertube.create({ retrieve_player: false });
-
-    const requestKey = 'O43z0dpjhgX20SCx4KAo';
-    const visitorData = innertube.session.context.client.visitorData;
-
-    if (!visitorData)
-      throw new Error('Could not get visitor data');
-
-    const dom = new JSDOM();
-
-    Object.assign(globalThis, {
-      window: dom.window,
-      document: dom.window.document
-    });
-
-    const bgConfig: BgConfig = {
-      fetch: (input: string | URL | globalThis.Request, init?: RequestInit) => fetch(input, init),
-      globalObj: globalThis,
-      identifier: visitorData,
-      requestKey
-    };
-
-    const bgChallenge = await BG.Challenge.create(bgConfig);
-
-    if (!bgChallenge)
-      throw new Error('Could not get challenge');
-
-    const interpreterJavascript = bgChallenge.interpreterJavascript.privateDoNotAccessOrElseSafeScriptWrappedValue;
-
-    if (interpreterJavascript) {
-      new Function(interpreterJavascript)();
-    } else throw new Error('Could not load VM');
-
-    const poTokenResult = await BG.PoToken.generate({
-      program: bgChallenge.program,
-      globalName: bgChallenge.globalName,
-      bgConfig
-    });
-
-    return { poTokenResult, visitorData };
   }
 }

@@ -8,14 +8,15 @@ import { IPlaylist, ISong, IMusicService } from '@/types';
 import { Platform, MediaType } from '@/enums';
 import { YoutubeService } from '@/services/youtube';
 import { SoundCloudService } from '@/services/soundcloud';
+import {  AudioResource } from '@discordjs/voice';
 
 export class MusicService {
   private youtube: YoutubeService = new YoutubeService();
   private soundcloud: SoundCloudService = new SoundCloudService();
 
-  public getStreamURLAsync(song: ISong): Promise<string> {
+  public createAudioResource(song: ISong): Promise<AudioResource> {
     const plugin = this.getPluginByPlatform(song.platform);
-    return plugin.getStreamURLAsync(song);
+    return plugin.createAudioResource(song);
   }
 
   public async getAsync(query: string, platform: Platform = Platform.YOUTUBE): Promise<IPlaylist | ISong> {
